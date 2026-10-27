@@ -1,0 +1,204 @@
+.server-module {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  min-height: 220px;
+  padding: 22px;
+  border: 1px solid rgb(155 178 207 / 14%);
+  border-radius: 16px;
+  color: #f0f3f5;
+  background:#030d1c;
+}
+
+@media (max-width: 760px) {
+  .server-module {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .server-module {
+    grid-column: span 2;
+  }
+}
+
+.server-module-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.server-module-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.server-module-icon {
+  position: relative;
+  display: grid;
+  flex: 0 0 110px;
+  width: 100px;
+  height: 110px;
+  place-items: center;
+  border: 8px solid #ff3838;
+  border-radius: 100%;
+  color: #fcfcfc;
+  background: transparent;
+}
+
+.server-module-icon::before {
+  position: absolute;
+  top: 76%;
+  left: 96%;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #030d1c;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.server-module-icon::after {
+  position: absolute;
+  top: 76%;
+  left: 96%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ff3838;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.server-module-status h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.server-module-status p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 6px 0 0;
+  color: #a7b2c0;
+  font-size: 12px;
+}
+
+.server-module.is-starting .server-module-icon,
+.server-module.is-stopping .server-module-icon {
+  border-color: #facc15;
+}
+
+.server-module.is-starting .server-module-icon::after,
+.server-module.is-stopping .server-module-icon::after {
+  background: #facc15;
+}
+
+.server-module.is-running .server-module-icon {
+  border-color: #4ade80;
+}
+
+.server-module.is-running .server-module-icon::after {
+  background: #4ade80;
+}
+
+.server-module-toggle {
+  display: grid;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.server-module-toggle.is-stop {
+  border: none;
+  color: #fbfbfb;
+  background: #ff3838;
+}
+
+.server-module-toggle.is-start {
+  border: none;
+  color: #f9f9f9;
+  background: #33b661;
+}
+
+
+.server-module-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.20;
+}
+
+.server-module-spinner {
+  animation: server-module-spin 900ms linear infinite;
+}
+
+.server-module-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: auto 0 0;
+  padding-top: 16px;
+  border-top: 1px solid rgb(155 178 207 / 12%);
+}
+
+.server-module-details > div + div {
+  padding-left: 16px;
+  border-left: 1px solid rgb(155 178 207 / 12%);
+}
+
+.server-module-details .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.server-module-details dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  margin: 0;
+  color: #e6edf5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.server-module-details dd svg {
+  flex: 0 0 auto;
+  color: #8190a4;
+}
+
+.server-module-details dd span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.server-module-error {
+  margin: -8px 0 0;
+  color: #fecaca;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+@keyframes server-module-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

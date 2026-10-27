@@ -1,0 +1,33 @@
+.home-modules {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-content: start;
+  gap: 16px;
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  animation: home-modules-enter 220ms ease-out both;
+}
+
+@media (max-width: 760px) {
+  .home-modules {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .home-modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@keyframes home-modules-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

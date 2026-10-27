@@ -1,0 +1,14 @@
+import On_Off from "../components/Home/On_Off.jsx";
+import ConnectedUsers from "../components/Home/ConnectedUsers.jsx";
+import Files from "../components/Home/Files.jsx";
+import "../components/Home/Home.css";
+
+export default function Home() {
+  return (
+    <div className="home-modules">
+      <On_Off />
+      <Files />
+      <ConnectedUsers />
+    </div>
+  );
+}

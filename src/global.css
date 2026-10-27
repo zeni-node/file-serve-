@@ -1,0 +1,233 @@
+:root {
+  --chrome-color: #030d1c;
+  --chrome-border-color: #0d2140;
+  --chrome-border-width: 1px;
+  --window-corner-radius: 12px;
+  --chrome-height: 44px;
+  --sidebar-logo-size: 40px;
+  --sidebar-icon-size: 56px;
+  --sidebar-icon-background: transparent;
+  --sidebar-icon-hover-background: rgb(255 255 255 / 11%);
+  --sidebar-icon-active-background: rgb(255 255 255 / 15%);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  color: #202b3c;
+  background: var(--chrome-color);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--chrome-color);
+}
+
+body {
+  height: 100%;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  border-radius: var(--window-corner-radius);
+  overflow: hidden;
+  background: var(--chrome-color);
+}
+
+.app-shell.has-titlebar {
+  grid-template-rows: var(--chrome-height) minmax(0, 1fr);
+}
+
+.window-titlebar {
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  height: var(--chrome-height);
+  padding: 0 18px;
+  background: var(--chrome-color);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.sidebar-logo {
+  display: block;
+  flex: 0 0 var(--sidebar-logo-size);
+  width: var(--sidebar-logo-size);
+  height: var(--sidebar-logo-size);
+  margin: 0 auto 18px;
+  object-fit: contain;
+  user-select: none;
+}
+
+.route-area {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 38px clamp(28px, 6vw, 88px);
+  border-top: var(--chrome-border-width) solid var(--chrome-border-color);
+  border-left: var(--chrome-border-width) solid var(--chrome-border-color);
+  border-top-left-radius: var(--window-corner-radius);
+  background: #0d1827;
+}
+
+.route-page {
+  width: min(100%, 1120px);
+  margin: clamp(48px, 10vh, 104px) auto 0;
+  animation: route-enter 220ms ease-out both;
+}
+
+.route-eyebrow {
+  margin: 0 0 12px;
+  color: #8290a3;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.route-title {
+  margin: 0;
+  color: #f0f3f5;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.route-description {
+  margin: 14px 0 0;
+  color: #a7b2c0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.app-sidebar {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 20px 16px 24px;
+  color: #f0f3f5;
+  background: var(--chrome-color);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.sidebar-icon-link {
+  display: grid;
+  flex: 0 0 var(--sidebar-icon-size);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #e7edf1;
+  background: var(--sidebar-icon-background);
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.sidebar-icon-link:hover {
+  background: var(--sidebar-icon-hover-background);
+}
+
+.sidebar-icon-link[aria-current="page"] {
+  border-color: rgb(255 255 255 / 12%);
+  color: #fff;
+  background: var(--sidebar-icon-active-background);
+}
+
+.sidebar-icon-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.sidebar-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.has-titlebar .route-area,
+.has-titlebar .app-sidebar {
+  grid-row: 2;
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    grid-template-columns: 190px minmax(0, 1fr);
+  }
+
+  .app-sidebar {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .route-area {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+
+  .route-area,
+  .has-titlebar .route-area {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    padding: 24px 16px 30px;
+  }
+
+  .app-sidebar,
+  .has-titlebar .app-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 21px 12px;
+  }
+}

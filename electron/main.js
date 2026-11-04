@@ -2,10 +2,32 @@ const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const { ServerService } = require("../server/services/serverService");
+const {
+  ensureJsonFiles,
+  saveRepositoryPath: saveRepositoryJsonPath
+} = require("../server/services/jsonFileManager");
+const { readServerConfig } = require("../server/services/serverConfig");
 const { registerServerIpc } = require("./ipc/server.ipc");
-const { registerRepositoryIpc } = require("./ipc/repository.ipc");
+const { readRepositoryPath, registerRepositoryIpc } = require("./ipc/repository.ipc");
 
-const serverService = new ServerService();
+function getJsonDirectory() {
+  return app.isPackaged
+    ? path.join(app.getPath("userData"), "json")
+    : path.join(app.getAppPath(), "json");
+}
+
+const serverService = new ServerService({
+  configProvider: async () => {
+    const repositoryPath = await readRepositoryPath(app);
+    await ensureJsonFiles({
+      directory: getJsonDirectory(),
+      repositoryPath
+    });
+    await readRepositoryPath(app);
+    return readServerConfig({ directory: getJsonDirectory() });
+  },
+  repositoryPathProvider: () => readRepositoryPath(app)
+});
 const splashDuration = 1400;
 
 function getPublicAssetPath(...segments) {
@@ -174,7 +196,14 @@ function createWindow() {
 }
 
 registerServerIpc(ipcMain, serverService);
-registerRepositoryIpc(ipcMain, { app, dialog });
+registerRepositoryIpc(ipcMain, {
+  app,
+  dialog,
+  saveSelectedRepositoryPath: (repositoryPath) => saveRepositoryJsonPath({
+    directory: getJsonDirectory(),
+    repositoryPath
+  })
+});
 
 app.whenReady().then(() => {
   app.setAppUserModelId("br.local.servidorarquivos");

@@ -145,7 +145,7 @@ body {
   width: var(--sidebar-icon-size);
   height: var(--sidebar-icon-size);
   place-items: center;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 12px;
   color: #e7edf1;
   background: var(--sidebar-icon-background);

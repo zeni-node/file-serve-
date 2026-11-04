@@ -1,6 +1,22 @@
 import { useEffect, useState } from "react";
-import { UsersRound } from "lucide-react";
+import {
+  CircleHelp,
+  MoreVertical,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Tv,
+  UsersRound
+} from "lucide-react";
 import "./ConnectedUsers.css";
+
+const deviceIcons = {
+  mobile: Smartphone,
+  tablet: Tablet,
+  computer: Monitor,
+  tv: Tv,
+  unknown: CircleHelp
+};
 
 export default function ConnectedUsers() {
   const [users, setUsers] = useState([]);
@@ -51,9 +67,11 @@ export default function ConnectedUsers() {
         </span>
         <div className="connected-users-heading">
           <h2 id="connected-users-title">Usuários conectados</h2>
-          <span className="connected-users-count" aria-label={`${users.length} usuários online`}>
-            {users.length}
-          </span>
+          {users.length > 0 && (
+            <span className="connected-users-count" aria-label={`${users.length} dispositivos conectados`}>
+              {users.length}
+            </span>
+          )}
         </div>
       </header>
 
@@ -69,12 +87,25 @@ export default function ConnectedUsers() {
         <p className="connected-users-message">Aguardando conexões dos usuários.</p>
       ) : (
         <ul className="connected-users-list" aria-live="polite">
-          {users.map((user) => (
-            <li key={`${user.name}-${user.lastSeenAt}`}>
-              <span className="connected-users-online-dot" aria-hidden="true" />
-              <span>{user.name}</span>
-            </li>
-          ))}
+          {users.map((user) => {
+            const DeviceIcon = deviceIcons[user.deviceType] ?? CircleHelp;
+            return (
+              <li key={`${user.name}-${user.lastSeenAt}`}>
+                <span className="connected-users-device-icon" aria-hidden="true">
+                  <DeviceIcon size={20} />
+                </span>
+                <span className="connected-users-user">
+                  <span className="connected-users-name">{user.name}</span>
+                  <span className="connected-users-device">
+                    {user.deviceName ?? "Dispositivo"}
+                  </span>
+                </span>
+                <span className="connected-users-menu-indicator" aria-hidden="true">
+                  <MoreVertical size={20} />
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

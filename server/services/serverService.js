@@ -23,13 +23,19 @@ class ServerService {
   constructor({
     host = DEFAULT_HOST,
     port = DEFAULT_PORT,
+    password = "",
+    configProvider = async () => ({ password }),
     appFactory = createApp,
-    presenceService = new PresenceService()
+    presenceService = new PresenceService(),
+    repositoryPathProvider = async () => null
   } = {}) {
     this.host = host;
     this.port = port;
+    this.password = password;
+    this.configProvider = configProvider;
     this.appFactory = appFactory;
     this.presenceService = presenceService;
+    this.repositoryPathProvider = repositoryPathProvider;
     this.server = null;
     this.startPromise = null;
     this.status = {
@@ -59,31 +65,43 @@ class ServerService {
       return this.startPromise;
     }
 
-    const app = this.appFactory({ presenceService: this.presenceService });
-    const server = app.listen(this.port, this.host);
-
-    this.startPromise = new Promise((resolve, reject) => {
-      server.once("error", (error) => {
-        this.status.message = `Não foi possível iniciar: ${error.message}`;
-        this.startPromise = null;
-        reject(error);
-      });
-
-      server.once("listening", () => {
-        this.server = server;
-        this.status = {
-          running: true,
-          host: this.host,
-          ip: getLocalIpAddress(),
-          port: server.address().port,
-          message: "Servidor iniciado e aguardando conexões"
-        };
-        this.startPromise = null;
-        resolve(this.getStatus());
-      });
-    });
-
+    this.startPromise = this.startServer();
     return this.startPromise;
+  }
+
+  async startServer() {
+    try {
+      const config = await this.configProvider();
+      this.password = config.password;
+      const app = this.appFactory({
+        password: this.password,
+        presenceService: this.presenceService,
+        repositoryPathProvider: this.repositoryPathProvider
+      });
+      const server = app.listen(this.port, this.host);
+
+      await new Promise((resolve, reject) => {
+        server.once("error", reject);
+        server.once("listening", () => {
+          this.server = server;
+          this.status = {
+            running: true,
+            host: this.host,
+            ip: getLocalIpAddress(),
+            port: server.address().port,
+            message: "Servidor iniciado e aguardando conexões"
+          };
+          resolve();
+        });
+      });
+
+      return this.getStatus();
+    } catch (error) {
+      this.status.message = `Não foi possível iniciar: ${error.message}`;
+      throw error;
+    } finally {
+      this.startPromise = null;
+    }
   }
 
   async stop() {

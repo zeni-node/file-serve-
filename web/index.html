@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meus arquivos</title>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+  <main id="login-panel" class="shell login-panel" hidden>
+    <p class="eyebrow">Servidor do meu computador</p>
+    <h1>Meus arquivos</h1>
+    <p class="lead">Entre para acessar os arquivos compartilhados.</p>
+    <form id="login-form">
+      <label for="username">Nome</label>
+      <input id="username" name="username" type="text" maxlength="64" autocomplete="username" required>
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">Entrar</button>
+    </form>
+    <p id="login-message" class="feedback" aria-live="polite"></p>
+  </main>
+
+  <main id="file-manager" class="shell manager" hidden>
+    <p class="eyebrow">Servidor do meu computador</p>
+    <div class="title-row">
+      <h1>Meus arquivos</h1>
+      <div class="manager-account">
+        <span id="signed-in-name"></span>
+        <button id="logout" type="button" class="ghost-button">Sair</button>
+      </div>
+      <span id="latency" class="latency">...</span>
+    </div>
+    <p id="breadcrumbs" class="breadcrumbs">Arquivos</p>
+    <section class="toolbar" aria-label="Ferramentas de arquivos">
+      <button type="button" id="back" class="icon-button" title="Voltar uma pasta"></button>
+      <button type="button" id="new-item" class="ghost-button">Novo</button>
+      <label class="primary-button" for="file-input">Enviar arquivo</label>
+      <input id="file-input" type="file" multiple hidden>
+    </section>
+    <section id="transfer" class="transfer" hidden aria-live="polite">
+      <div><strong id="transfer-name"></strong><span id="transfer-details"></span></div>
+      <progress id="transfer-progress" max="100" value="0"></progress>
+    </section>
+    <section class="file-panel" aria-label="Arquivos e pastas">
+      <p id="empty-message" class="empty" hidden>Esta pasta está vazia.</p>
+      <ul id="file-list" class="file-list" aria-label="Lista de arquivos"></ul>
+    </section>
+    <p id="message" class="updated" aria-live="polite"></p>
+  </main>
+
+  <div id="item-menu" class="item-menu" hidden role="menu">
+    <button type="button" data-action="open" role="menuitem"></button>
+    <button type="button" data-action="download" role="menuitem">Baixar</button>
+    <button type="button" data-action="copy" role="menuitem">Copiar</button>
+    <button type="button" data-action="cut" role="menuitem">Recortar</button>
+    <button type="button" data-action="paste" role="menuitem">Colar</button>
+    <button type="button" data-action="rename" role="menuitem">Renomear</button>
+    <button type="button" data-action="delete" class="danger-action" role="menuitem">Excluir</button>
+    <button type="button" data-action="new" role="menuitem">Novo</button>
+  </div>
+
+  <div id="new-menu" class="item-menu" hidden role="menu">
+    <button type="button" data-type="folder" role="menuitem">Pasta</button>
+    <button type="button" data-type="file" role="menuitem">Arquivo</button>
+  </div>
+
+  <dialog id="preview">
+    <div class="preview-bar">
+      <strong id="preview-title"></strong>
+      <div class="preview-actions">
+        <button type="button" id="download-preview" class="ghost-button">Baixar</button>
+        <button type="button" id="close-preview" class="icon-button" title="Fechar"></button>
+      </div>
+    </div>
+    <div id="preview-content" class="preview-content"></div>
+  </dialog>
+  <script src="/assets/js/app.js" defer></script>
+</body>
+</html>

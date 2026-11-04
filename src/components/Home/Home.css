@@ -23,7 +23,7 @@
 @keyframes home-modules-enter {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(20px);
   }
 
   to {

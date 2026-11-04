@@ -55,13 +55,13 @@
   border: 0;
   border-radius: 11px;
   color: #f0f3f5;
-  background: #245c91;
+  background: #0d1827;
   cursor: pointer;
   transition: background-color 140ms ease, opacity 140ms ease;
 }
 
 .files-module-select:hover:not(:disabled) {
-  background: #3175b5;
+  background: #1f324e;
 }
 
 .files-module-select:disabled {

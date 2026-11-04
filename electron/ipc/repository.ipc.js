@@ -2,22 +2,16 @@ const { promises: fs } = require("node:fs");
 const path = require("node:path");
 const { BrowserWindow } = require("electron");
 
-const SETTINGS_FILE = "repository-settings.json";
+const SETTINGS_FILE = "repository.json";
+const LEGACY_SETTINGS_FILE = "repository-settings.json";
 
-async function readRepositoryPath(app) {
-  const settingsPath = path.join(app.getPath("userData"), SETTINGS_FILE);
-  let contents;
+function getSettingsDirectory(app) {
+  return app.isPackaged
+    ? path.join(app.getPath("userData"), "json")
+    : path.join(app.getAppPath(), "json");
+}
 
-  try {
-    contents = await fs.readFile(settingsPath, "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      return null;
-    }
-
-    throw error;
-  }
-
+function parseSettings(contents, settingsPath) {
   let settings;
   try {
     settings = JSON.parse(contents);
@@ -30,23 +24,54 @@ async function readRepositoryPath(app) {
     typeof settings !== "object" ||
     (settings.repositoryPath !== null && typeof settings.repositoryPath !== "string")
   ) {
-    throw new Error("As configurações salvas do repositório são inválidas.");
+    throw new Error(`As configurações salvas em "${settingsPath}" são inválidas.`);
   }
 
-  return settings.repositoryPath;
+  return settings;
 }
 
-async function saveRepositoryPath(app, repositoryPath) {
-  const settingsDirectory = app.getPath("userData");
-  await fs.mkdir(settingsDirectory, { recursive: true });
-  await fs.writeFile(
-    path.join(settingsDirectory, SETTINGS_FILE),
-    JSON.stringify({ repositoryPath }, null, 2),
-    "utf8"
-  );
+async function readSettingsFile(settingsPath) {
+  try {
+    return parseSettings(await fs.readFile(settingsPath, "utf8"), settingsPath);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
-function registerRepositoryIpc(ipcMain, { app, dialog }) {
+async function readRepositoryPath(app) {
+  const settingsDirectory = getSettingsDirectory(app);
+  const settingsPath = path.join(settingsDirectory, SETTINGS_FILE);
+  const settings = await readSettingsFile(settingsPath);
+
+  if (settings) {
+    await removeLegacySettings(app);
+    return settings.repositoryPath;
+  }
+
+  const legacyPath = path.join(app.getPath("userData"), LEGACY_SETTINGS_FILE);
+  const legacySettings = await readSettingsFile(legacyPath);
+  if (!legacySettings) {
+    return null;
+  }
+
+  return legacySettings.repositoryPath;
+}
+
+async function removeLegacySettings(app) {
+  try {
+    await fs.unlink(path.join(app.getPath("userData"), LEGACY_SETTINGS_FILE));
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+}
+
+function registerRepositoryIpc(ipcMain, { app, dialog, saveSelectedRepositoryPath }) {
   ipcMain.handle("repository:get-path", () => readRepositoryPath(app));
 
   ipcMain.handle("repository:select-directory", async (event) => {
@@ -69,9 +94,10 @@ function registerRepositoryIpc(ipcMain, { app, dialog }) {
       throw new Error("O seletor não retornou uma pasta.");
     }
 
-    await saveRepositoryPath(app, repositoryPath);
+    await saveSelectedRepositoryPath(repositoryPath);
+    await removeLegacySettings(app);
     return { canceled: false, repositoryPath };
   });
 }
 
-module.exports = { registerRepositoryIpc };
+module.exports = { readRepositoryPath, registerRepositoryIpc };

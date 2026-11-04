@@ -48,19 +48,6 @@
   white-space: nowrap;
 }
 
-.connected-users-count {
-  display: grid;
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 50%;
-  color: #dce7f3;
-  background: rgb(255 255 255 / 9%);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .connected-users-message {
   margin: auto 0;
   color: #9aaabd;
@@ -82,7 +69,7 @@
 .connected-users-list li {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
   padding: 10px 12px;
   border-radius: 10px;
@@ -91,8 +78,66 @@
   font-size: 12px;
 }
 
-.connected-users-list li > span:last-child {
+.connected-users-device-icon {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  color: #ffffff;
+}
+
+.connected-users-user {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.connected-users-menu-indicator {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fdfdfd;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-radius 160ms ease;
+}
+
+.connected-users-menu-indicator:hover {
+  background: rgb(253 253 253 / 15%);
+}
+
+.connected-users-name,
+.connected-users-device {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connected-users-name {
+  color: #e6edf5;
+  font-weight: 600;
+}
+
+.connected-users-device {
+  color: #9aaabd;
+  font-size: 11px;
+}
+
+.connected-users-count {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: #dce7f3;
+  font-size: 15px;
+  font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

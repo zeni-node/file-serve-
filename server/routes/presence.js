@@ -1,13 +1,14 @@
 const express = require("express");
 
-function createPresenceRoute(presenceService) {
+function createPresenceRoute(presenceService, requireAuth) {
   const presenceRoute = express.Router();
 
-  presenceRoute.post("/presence/heartbeat", (request, response) => {
+  presenceRoute.post("/presence/heartbeat", requireAuth, (request, response) => {
     try {
       const result = presenceService.recordHeartbeat(
-        request.body?.name,
-        request.ip
+        request.authenticatedUser.username,
+        request.ip,
+        request.body?.device
       );
       response.json(result);
     } catch (error) {
@@ -18,6 +19,10 @@ function createPresenceRoute(presenceService) {
 
       throw error;
     }
+  });
+
+  presenceRoute.get("/presence/online", requireAuth, (_request, response) => {
+    response.json(presenceService.getOnlineUsers());
   });
 
   return presenceRoute;

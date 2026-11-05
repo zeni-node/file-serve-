@@ -1,6 +1,10 @@
 const os = require("node:os");
 const { createApp } = require("../app");
-const { PresenceService } = require("./presenceService");
+const {
+  DEFAULT_MAX_USERS,
+  DEVICE_TYPES,
+  PresenceService
+} = require("./presenceService");
 
 const DEFAULT_HOST = "0.0.0.0";
 const DEFAULT_PORT = 3000;
@@ -73,6 +77,10 @@ class ServerService {
     try {
       const config = await this.configProvider();
       this.password = config.password;
+      this.presenceService.configure({
+        maxUsers: config.maxUsers ?? DEFAULT_MAX_USERS,
+        allowedDeviceTypes: config.allowedDeviceTypes ?? [...DEVICE_TYPES]
+      });
       const app = this.appFactory({
         password: this.password,
         presenceService: this.presenceService,

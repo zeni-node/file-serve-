@@ -1,0 +1,104 @@
+.allowed-devices {
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  gap: 18px;
+  min-width: 0;
+  min-height: 250px;
+  padding: 22px;
+  border: 1px solid rgb(155 178 207 / 14%);
+  border-radius: 16px;
+  color: #f0f3f5;
+  background: #030d1c;
+}
+
+.allowed-devices .settings-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.allowed-devices h2 {
+  margin: 0;
+  color: #edf2f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.allowed-devices .settings-section-heading p {
+  margin: 7px 0 0;
+  color: #9eacbd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.allowed-devices .settings-device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.allowed-devices .settings-device-option {
+  position: relative;
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #273951;
+  border-radius: 12px;
+  color: #a7b2c0;
+  background: #0d1827;
+  cursor: pointer;
+  font-size: 13px;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.allowed-devices .settings-device-option:hover {
+  border-color: #536b8a;
+}
+
+.allowed-devices .settings-device-option.is-allowed {
+  border-color: #3d6c9e;
+  color: #f0f3f5;
+  background: #14283c;
+}
+
+.allowed-devices .settings-device-option input {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  accent-color: #69a6e8;
+}
+
+.allowed-devices .settings-device-option:focus-within {
+  outline: 2px solid #6d9cff;
+  outline-offset: 3px;
+}
+
+.allowed-devices .settings-device-icon {
+  color: #8092a9;
+}
+
+.allowed-devices .settings-device-option.is-allowed .settings-device-icon {
+  color: #8bc4ff;
+}
+
+@media (max-width: 760px) {
+  .allowed-devices {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .allowed-devices {
+    grid-column: span 2;
+  }
+}

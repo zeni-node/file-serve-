@@ -6,7 +6,10 @@ const {
   ensureJsonFiles,
   saveRepositoryPath: saveRepositoryJsonPath
 } = require("../server/services/jsonFileManager");
-const { readServerConfig } = require("../server/services/serverConfig");
+const {
+  readServerConfig,
+  saveServerSettings
+} = require("../server/services/serverConfig");
 const { registerServerIpc } = require("./ipc/server.ipc");
 const { readRepositoryPath, registerRepositoryIpc } = require("./ipc/repository.ipc");
 
@@ -195,7 +198,16 @@ function createWindow() {
     });
 }
 
-registerServerIpc(ipcMain, serverService);
+registerServerIpc(ipcMain, serverService, {
+  readSettings: async () => {
+    await ensureJsonFiles({ directory: getJsonDirectory() });
+    return readServerConfig({ directory: getJsonDirectory() });
+  },
+  saveSettings: async (settings) => {
+    await ensureJsonFiles({ directory: getJsonDirectory() });
+    return saveServerSettings({ directory: getJsonDirectory(), ...settings });
+  }
+});
 registerRepositoryIpc(ipcMain, {
   app,
   dialog,

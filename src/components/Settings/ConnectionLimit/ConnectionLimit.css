@@ -1,0 +1,78 @@
+.connection-limit {
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+  gap: 18px;
+  min-width: 0;
+  min-height: 150px;
+  padding: 22px;
+  border: 1px solid rgb(155 178 207 / 14%);
+  border-radius: 16px;
+  color: #f0f3f5;
+  background: #030d1c;
+}
+
+.connection-limit .settings-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.connection-limit h2 {
+  margin: 0;
+  color: #edf2f7;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.connection-limit .settings-section-heading p {
+  margin: 7px 0 0;
+  color: #9eacbd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.connection-limit .settings-limit-control select {
+  min-width: 142px;
+  padding: 10px 12px;
+  border: 1px solid #30445e;
+  border-radius: 9px;
+  color: #f0f3f5;
+  background: #0b1421;
+  font: inherit;
+}
+
+.connection-limit .settings-limit-control select:focus-visible {
+  outline: 2px solid #6d9cff;
+  outline-offset: 3px;
+}
+
+.connection-limit .settings-hint {
+  margin: 14px 0 0;
+  color: #8290a3;
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .connection-limit {
+    grid-column: span 2;
+  }
+
+  .connection-limit .settings-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .connection-limit .settings-limit-control,
+  .connection-limit .settings-limit-control select {
+    width: 100%;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 760px) {
+  .connection-limit {
+    grid-column: span 3;
+  }
+}

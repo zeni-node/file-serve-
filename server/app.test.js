@@ -164,6 +164,57 @@ test("records browser device details and lists them only to signed-in clients", 
   assert.equal(unauthorizedResponse.status, 401);
 });
 
+test("returns stable API codes when capacity or device policy blocks a heartbeat", async (t) => {
+  const { PresenceService } = require("./services/presenceService");
+  const presenceService = new PresenceService({
+    maxUsers: 1,
+    allowedDeviceTypes: ["mobile"]
+  });
+  const server = createApp({
+    password: "correct horse battery staple",
+    presenceService
+  }).listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  }));
+
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const login = async (username) => {
+    const response = await fetch(`${baseUrl}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password: "correct horse battery staple" })
+    });
+    return response.headers.get("set-cookie").split(";")[0];
+  };
+  const heartbeat = (cookie, device) => fetch(`${baseUrl}/presence/heartbeat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({ device })
+  });
+
+  const firstCookie = await login("Ana");
+  assert.equal((await heartbeat(firstCookie, { id: "phone", type: "mobile" })).status, 200);
+
+  const secondCookie = await login("Bia");
+  const capacityResponse = await heartbeat(secondCookie, { id: "tablet", type: "mobile" });
+  assert.equal(capacityResponse.status, 409);
+  assert.deepEqual(await capacityResponse.json(), {
+    ok: false,
+    code: "SERVER_CAPACITY_REACHED",
+    error: "O servidor atingiu o limite máximo de conexões."
+  });
+
+  const deviceResponse = await heartbeat(secondCookie, { id: "computer", type: "computer" });
+  assert.equal(deviceResponse.status, 403);
+  assert.deepEqual(await deviceResponse.json(), {
+    ok: false,
+    code: "DEVICE_TYPE_NOT_ALLOWED",
+    error: "Este tipo de dispositivo não está permitido pelo servidor."
+  });
+});
+
 test("reports when the server password has not been configured", async (t) => {
   const server = createApp({ password: "" }).listen(0, "127.0.0.1");
   await once(server, "listening");

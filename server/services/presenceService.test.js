@@ -1,6 +1,10 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { PresenceService, PRESENCE_TIMEOUT_MS } = require("./presenceService");
+const {
+  PresenceError,
+  PresenceService,
+  PRESENCE_TIMEOUT_MS
+} = require("./presenceService");
 
 test("records and refreshes a named user's heartbeat", () => {
   let now = 1_000;
@@ -89,5 +93,29 @@ test("rejects invalid browser-provided device details", () => {
   assert.throws(
     () => presence.recordHeartbeat("Ana", "192.168.1.10", { name: "a".repeat(49) }),
     RangeError
+  );
+});
+
+test("enforces the configured connection limit without rejecting existing heartbeats", () => {
+  const presence = new PresenceService({ maxUsers: 1 });
+  presence.recordHeartbeat("Ana", "192.168.1.10");
+
+  assert.throws(
+    () => presence.recordHeartbeat("Bia", "192.168.1.11"),
+    (error) => error instanceof PresenceError && error.code === "SERVER_CAPACITY_REACHED"
+  );
+  assert.doesNotThrow(() => presence.recordHeartbeat("Ana", "192.168.1.10"));
+  assert.equal(presence.getOnlineUsers().length, 1);
+});
+
+test("allows only configured device types", () => {
+  const presence = new PresenceService({ allowedDeviceTypes: ["mobile", "tv"] });
+
+  assert.doesNotThrow(() => presence.recordHeartbeat("Ana", "192.168.1.10", {
+    type: "mobile"
+  }));
+  assert.throws(
+    () => presence.recordHeartbeat("Bia", "192.168.1.11", { type: "computer" }),
+    (error) => error instanceof PresenceError && error.code === "DEVICE_TYPE_NOT_ALLOWED"
   );
 });

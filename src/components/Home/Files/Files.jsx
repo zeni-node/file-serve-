@@ -68,36 +68,10 @@ export default function Files() {
         <div className="files-module-heading">
           <div className="files-module-title">
             <Folder size={25} aria-hidden="true" />
-            <h2 id="files-module-title">Caminho do repositório</h2>
+            <h2 id="files-module-title">Repositório local</h2>
           </div>
-          <button
-            className="files-module-select"
-            type="button"
-            onClick={selectDirectory}
-            disabled={loading || selecting || !window.fileServer}
-            aria-label="Selecionar pasta do repositório"
-            title="Selecionar pasta"
-          >
-            {selecting ? (
-              <LoaderCircle className="files-module-spinner" size={20} aria-hidden="true" />
-            ) : (
-              <FolderOpen size={22} aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
-
-      <p className="files-module-path" title={repositoryPath ?? undefined}>
-        {loading
-          ? "Carregando pasta..."
-          : repositoryPath ?? "Selecione a pasta onde os arquivos serão armazenados."}
-      </p>
-
-      {error && (
-        <p className="files-module-error" role="alert">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

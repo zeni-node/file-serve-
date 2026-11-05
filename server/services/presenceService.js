@@ -4,6 +4,17 @@ const MAX_NAME_LENGTH = 64;
 const MAX_DEVICE_ID_LENGTH = 128;
 const MAX_DEVICE_NAME_LENGTH = 48;
 const DEVICE_TYPES = new Set(["mobile", "tablet", "computer", "tv", "unknown"]);
+const DEFAULT_MAX_USERS = 25;
+const MAX_USERS = 25;
+
+class PresenceError extends Error {
+  constructor(message, code, statusCode) {
+    super(message);
+    this.name = "PresenceError";
+    this.code = code;
+    this.statusCode = statusCode;
+  }
+}
 
 function getDefaultDeviceName(deviceType) {
   const names = {
@@ -17,10 +28,32 @@ function getDefaultDeviceName(deviceType) {
 }
 
 class PresenceService {
-  constructor({ clock = Date.now, timeoutMs = PRESENCE_TIMEOUT_MS } = {}) {
+  constructor({
+    clock = Date.now,
+    timeoutMs = PRESENCE_TIMEOUT_MS,
+    maxUsers = DEFAULT_MAX_USERS,
+    allowedDeviceTypes = [...DEVICE_TYPES]
+  } = {}) {
     this.clock = clock;
     this.timeoutMs = timeoutMs;
     this.users = new Map();
+    this.configure({ maxUsers, allowedDeviceTypes });
+  }
+
+  configure({ maxUsers, allowedDeviceTypes }) {
+    if (!Number.isInteger(maxUsers) || maxUsers < 1 || maxUsers > MAX_USERS) {
+      throw new RangeError(`O limite de usuários deve ser um número inteiro entre 1 e ${MAX_USERS}.`);
+    }
+
+    if (
+      !Array.isArray(allowedDeviceTypes) ||
+      allowedDeviceTypes.some((deviceType) => !DEVICE_TYPES.has(deviceType))
+    ) {
+      throw new RangeError("A lista de tipos de dispositivo permitidos não é válida.");
+    }
+
+    this.maxUsers = maxUsers;
+    this.allowedDeviceTypes = new Set(allowedDeviceTypes);
   }
 
   recordHeartbeat(name, clientAddress, device = {}) {
@@ -49,11 +82,27 @@ class PresenceService {
     }
 
     this.removeExpiredUsers();
+    if (!this.allowedDeviceTypes.has(deviceType)) {
+      throw new PresenceError(
+        "Este tipo de dispositivo não está permitido pelo servidor.",
+        "DEVICE_TYPE_NOT_ALLOWED",
+        403
+      );
+    }
+
     const key = [
       clientAddress,
       normalizedName.toLocaleLowerCase(),
       deviceId || "default"
     ].join("\u0000");
+    if (!this.users.has(key) && this.users.size >= this.maxUsers) {
+      throw new PresenceError(
+        "O servidor atingiu o limite máximo de conexões.",
+        "SERVER_CAPACITY_REACHED",
+        409
+      );
+    }
+
     this.users.set(key, {
       name: normalizedName,
       deviceType,
@@ -61,7 +110,12 @@ class PresenceService {
       lastSeenAt: this.clock()
     });
 
-    return { ok: true, heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS };
+    return {
+      ok: true,
+      code: "CONNECTED",
+      message: "Conexão registrada.",
+      heartbeatIntervalMs: HEARTBEAT_INTERVAL_MS
+    };
   }
 
   getOnlineUsers() {
@@ -96,5 +150,8 @@ module.exports = {
   HEARTBEAT_INTERVAL_MS,
   PRESENCE_TIMEOUT_MS,
   DEVICE_TYPES,
+  DEFAULT_MAX_USERS,
+  MAX_USERS,
+  PresenceError,
   PresenceService
 };

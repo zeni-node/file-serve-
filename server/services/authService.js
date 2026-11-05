@@ -114,6 +114,7 @@ function createRequireAuth(authService) {
 module.exports = {
   AuthError,
   AuthService,
+  MAX_PASSWORD_LENGTH,
   SESSION_COOKIE_NAME,
   SESSION_TTL_MS,
   createRequireAuth,

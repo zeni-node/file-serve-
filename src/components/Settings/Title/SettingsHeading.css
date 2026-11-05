@@ -1,0 +1,16 @@
+.settings-heading {
+  box-sizing: border-box;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0 0 8px;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.settings-heading__title {
+  margin: 0;
+  color: #f0f3f5;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}

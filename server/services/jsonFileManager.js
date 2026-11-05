@@ -4,7 +4,11 @@ const path = require("node:path");
 const JSON_FILES = [
   {
     name: "server.json",
-    createDefault: () => ({ password: "" })
+    createDefault: () => ({
+      password: "",
+      maxUsers: 25,
+      allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+    })
   },
   {
     name: "repository.json",

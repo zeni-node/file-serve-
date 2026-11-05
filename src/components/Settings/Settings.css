@@ -1,0 +1,33 @@
+.settings-modules {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-content: start;
+  gap: 16px;
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  animation: settings-modules-enter 220ms ease-out both;
+}
+
+@media (max-width: 760px) {
+  .settings-modules {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .settings-modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@keyframes settings-modules-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

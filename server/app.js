@@ -11,7 +11,8 @@ const { FileService } = require("./services/fileService");
 function createApp({
   presenceService = new PresenceService(),
   password = "",
-  authService = new AuthService({ password }),
+  passwordEnabled,
+  authService = new AuthService({ password, passwordEnabled }),
   repositoryPathProvider = async () => null,
   fileService = new FileService({ repositoryPathProvider }),
   webRoot = path.join(__dirname, "..", "web")

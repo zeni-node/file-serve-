@@ -67,22 +67,30 @@ export default function Files() {
       <header className="files-module-header">
         <div className="files-module-heading">
           <div className="files-module-title">
-            <Folder size={25} aria-hidden="true" />
-            <h2 id="files-module-title">Repositório local</h2>
+            <div className="files-module-title-copy">
+              <div className="files-module-title-heading">
+                <Folder size={25} aria-hidden="true" />
+                <h2 id="files-module-title">Repositório local</h2>
+              </div>
+              <p>Escolha onde os arquivos compartilhados serão armazenados.</p>
+            </div>
           </div>
           <button
-            className="files-module-select"
+            className={`files-module-select${selecting ? " is-selecting" : ""}`}
             type="button"
             onClick={selectDirectory}
             disabled={loading || selecting || !window.fileServer}
             aria-label="Selecionar pasta do repositório"
             title="Selecionar pasta"
           >
-            {selecting ? (
-              <LoaderCircle className="files-module-spinner" size={20} aria-hidden="true" />
-            ) : (
-              <FolderOpen size={22} aria-hidden="true" />
-            )}
+            <span className="files-module-select-label" aria-hidden={selecting}>
+              Escolher local
+            </span>
+            <LoaderCircle
+              className="files-module-spinner"
+              size={20}
+              aria-hidden="true"
+            />
           </button>
         </div>
       </header>

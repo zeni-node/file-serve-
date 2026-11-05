@@ -27,10 +27,25 @@ function parseServerConfig(contents, filePath) {
     );
   }
 
+  const passwordEnabled = config.passwordEnabled ?? config.password.length > 0;
+  if (typeof passwordEnabled !== "boolean") {
+    throw new Error(
+      `O campo "passwordEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
   const maxUsers = config.maxUsers ?? DEFAULT_MAX_USERS;
   if (!Number.isInteger(maxUsers) || maxUsers < 1 || maxUsers > DEFAULT_MAX_USERS) {
     throw new Error(
       `O campo "maxUsers" no arquivo "${filePath}" deve ser um número inteiro entre 1 e ${DEFAULT_MAX_USERS}.`
+    );
+  }
+
+  const maxUsersEnabled = config.maxUsersEnabled ?? (
+    config.maxUsers !== undefined && config.maxUsers < DEFAULT_MAX_USERS
+  );
+  if (typeof maxUsersEnabled !== "boolean") {
+    throw new Error(
+      `O campo "maxUsersEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
     );
   }
 
@@ -43,11 +58,29 @@ function parseServerConfig(contents, filePath) {
       `O campo "allowedDeviceTypes" no arquivo "${filePath}" deve conter apenas tipos de dispositivo válidos.`
     );
   }
+  const normalizedAllowedDeviceTypes = [...new Set(allowedDeviceTypes)];
+  const allowedDeviceTypesEnabled = config.allowedDeviceTypesEnabled ?? (
+    config.allowedDeviceTypes !== undefined &&
+    normalizedAllowedDeviceTypes.length < DEVICE_TYPES.size
+  );
+  if (typeof allowedDeviceTypesEnabled !== "boolean") {
+    throw new Error(
+      `O campo "allowedDeviceTypesEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  if (allowedDeviceTypesEnabled && normalizedAllowedDeviceTypes.length === 0) {
+    throw new Error(
+      `O campo "allowedDeviceTypes" no arquivo "${filePath}" deve conter pelo menos um tipo de dispositivo permitido quando o filtro estiver ativado.`
+    );
+  }
 
   return {
     password: config.password,
+    passwordEnabled,
     maxUsers,
-    allowedDeviceTypes: [...new Set(allowedDeviceTypes)]
+    maxUsersEnabled,
+    allowedDeviceTypes: normalizedAllowedDeviceTypes,
+    allowedDeviceTypesEnabled
   };
 }
 
@@ -61,35 +94,56 @@ async function saveServerSettings({
   directory,
   maxUsers,
   allowedDeviceTypes,
-  password
+  maxUsersEnabled,
+  allowedDeviceTypesEnabled,
+  password,
+  passwordEnabled
 }) {
   if (
     !Number.isInteger(maxUsers) ||
     !Array.isArray(allowedDeviceTypes) ||
     (password !== undefined &&
       (typeof password !== "string" ||
-        password.length === 0 ||
-        password.length > MAX_PASSWORD_LENGTH))
+        password.length > MAX_PASSWORD_LENGTH)) ||
+    (passwordEnabled !== undefined && typeof passwordEnabled !== "boolean") ||
+    (maxUsersEnabled !== undefined && typeof maxUsersEnabled !== "boolean") ||
+    (allowedDeviceTypesEnabled !== undefined &&
+      typeof allowedDeviceTypesEnabled !== "boolean")
   ) {
     throw new TypeError(
-      `Informe configurações válidas e, se fornecida, uma senha entre 1 e ${MAX_PASSWORD_LENGTH} caracteres.`
+      `Informe configurações válidas e, se fornecida, uma senha com no máximo ${MAX_PASSWORD_LENGTH} caracteres e um estado de senha válido.`
     );
   }
 
   const configPath = path.join(directory, "server.json");
   const currentConfig = await readServerConfig({ directory });
+  const nextPassword = password || currentConfig.password;
+  const nextMaxUsersEnabled = maxUsersEnabled ?? (
+    maxUsers === currentConfig.maxUsers
+      ? currentConfig.maxUsersEnabled
+      : true
+  );
   const config = parseServerConfig(JSON.stringify({
-    password: password ?? currentConfig.password,
+    password: nextPassword,
+    passwordEnabled: passwordEnabled ?? (
+      password ? true : currentConfig.passwordEnabled
+    ),
     maxUsers,
-    allowedDeviceTypes
+    maxUsersEnabled: nextMaxUsersEnabled,
+    allowedDeviceTypes,
+    allowedDeviceTypesEnabled: allowedDeviceTypesEnabled ??
+      currentConfig.allowedDeviceTypesEnabled
   }), configPath);
 
   await mkdir(directory, { recursive: true });
   await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
   return {
     maxUsers: config.maxUsers,
+    maxUsersEnabled: config.maxUsersEnabled,
     allowedDeviceTypes: config.allowedDeviceTypes,
-    hasPassword: config.password.length > 0
+    allowedDeviceTypesEnabled: config.allowedDeviceTypesEnabled,
+    hasPassword: config.passwordEnabled,
+    hasSavedPassword: config.password.length > 0
   };
 }
 

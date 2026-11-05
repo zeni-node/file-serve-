@@ -14,24 +14,17 @@ class AuthError extends Error {
 }
 
 class AuthService {
-  constructor({ password = "", clock = Date.now } = {}) {
-    this.password = typeof password === "string" && password.length > 0 ? password : null;
+  constructor({ password = "", passwordEnabled, clock = Date.now } = {}) {
+    this.password = typeof password === "string" ? password : "";
+    this.passwordEnabled = Boolean(passwordEnabled ?? this.password.length > 0) &&
+      this.password.length > 0;
     this.clock = clock;
     this.sessions = new Map();
   }
 
   createSession(username, password) {
-    if (!this.password) {
-      throw new AuthError("O servidor ainda não foi configurado com uma senha.", 503);
-    }
-
-    if (
-      typeof username !== "string" ||
-      typeof password !== "string" ||
-      password.length === 0 ||
-      password.length > MAX_PASSWORD_LENGTH
-    ) {
-      throw new AuthError("Informe o nome de usuário e a senha.", 400);
+    if (typeof username !== "string") {
+      throw new AuthError(`O nome deve ter entre 1 e ${MAX_USERNAME_LENGTH} caracteres.`, 400);
     }
 
     const normalizedUsername = username.trim();
@@ -39,10 +32,20 @@ class AuthService {
       throw new AuthError(`O nome deve ter entre 1 e ${MAX_USERNAME_LENGTH} caracteres.`, 400);
     }
 
-    const suppliedPasswordHash = createHash("sha256").update(password).digest();
-    const expectedPasswordHash = createHash("sha256").update(this.password).digest();
-    if (!timingSafeEqual(suppliedPasswordHash, expectedPasswordHash)) {
-      throw new AuthError("Nome de usuário ou senha incorretos.", 401);
+    if (this.passwordEnabled) {
+      if (
+        typeof password !== "string" ||
+        password.length === 0 ||
+        password.length > MAX_PASSWORD_LENGTH
+      ) {
+        throw new AuthError("Informe o nome de usuário e a senha.", 400);
+      }
+
+      const suppliedPasswordHash = createHash("sha256").update(password).digest();
+      const expectedPasswordHash = createHash("sha256").update(this.password).digest();
+      if (!timingSafeEqual(suppliedPasswordHash, expectedPasswordHash)) {
+        throw new AuthError("Nome de usuário ou senha incorretos.", 401);
+      }
     }
 
     const now = this.clock();

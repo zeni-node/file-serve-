@@ -83,6 +83,60 @@ test("requires a server password to create a client session", async (t) => {
   assert.equal(revokedSessionResponse.status, 401);
 });
 
+test("ignores a saved password when password protection is disabled", async (t) => {
+  const { PresenceService } = require("./services/presenceService");
+  const presenceService = new PresenceService();
+  const server = createApp({
+    password: "saved-but-disabled",
+    passwordEnabled: false,
+    presenceService
+  }).listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  }));
+
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const loginResponse = await fetch(`${baseUrl}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: "Ana" })
+  });
+  assert.equal(loginResponse.status, 200);
+  assert.deepEqual(await loginResponse.json(), { username: "Ana" });
+
+  const cookie = loginResponse.headers.get("set-cookie").split(";")[0];
+  const heartbeatResponse = await fetch(`${baseUrl}/presence/heartbeat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({ name: "Ana" })
+  });
+  assert.equal(heartbeatResponse.status, 200);
+  assert.deepEqual(
+    presenceService.getOnlineUsers().map((user) => user.name),
+    ["Ana"]
+  );
+});
+
+test("allows password protection to be enabled without a saved password", async (t) => {
+  const server = createApp({
+    password: "",
+    passwordEnabled: true
+  }).listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  }));
+
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: "Ana" })
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { username: "Ana" });
+});
+
 test("protects the presence endpoint and uses the signed-in username", async (t) => {
   const { PresenceService } = require("./services/presenceService");
   const presenceService = new PresenceService();
@@ -215,7 +269,7 @@ test("returns stable API codes when capacity or device policy blocks a heartbeat
   });
 });
 
-test("reports when the server password has not been configured", async (t) => {
+test("allows a client session when the server password has not been configured", async (t) => {
   const server = createApp({ password: "" }).listen(0, "127.0.0.1");
   await once(server, "listening");
   t.after(() => new Promise((resolve, reject) => {
@@ -225,9 +279,11 @@ test("reports when the server password has not been configured", async (t) => {
   const response = await fetch(`http://127.0.0.1:${server.address().port}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "Ana", password: "any password" })
+    body: JSON.stringify({ username: "Ana" })
   });
-  assert.equal(response.status, 503);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { username: "Ana" });
+  assert.match(response.headers.get("set-cookie"), /file_server_session=/);
 });
 
 test("provides authenticated file management inside the selected repository", async (t) => {

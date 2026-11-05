@@ -1,4 +1,7 @@
 const os = require("node:os");
+const fs = require("node:fs/promises");
+const { constants } = require("node:fs");
+const net = require("node:net");
 const { createApp } = require("../app");
 const {
   DEFAULT_MAX_USERS,
@@ -31,7 +34,8 @@ class ServerService {
     configProvider = async () => ({ password }),
     appFactory = createApp,
     presenceService = new PresenceService(),
-    repositoryPathProvider = async () => null
+    repositoryPathProvider = async () => null,
+    ipAddressProvider = getLocalIpAddress
   } = {}) {
     this.host = host;
     this.port = port;
@@ -40,6 +44,7 @@ class ServerService {
     this.appFactory = appFactory;
     this.presenceService = presenceService;
     this.repositoryPathProvider = repositoryPathProvider;
+    this.ipAddressProvider = ipAddressProvider;
     this.server = null;
     this.startPromise = null;
     this.status = {
@@ -52,7 +57,7 @@ class ServerService {
   }
 
   getStatus() {
-    this.status.ip = getLocalIpAddress();
+    this.status.ip = this.ipAddressProvider();
     return { ...this.status };
   }
 
@@ -76,13 +81,27 @@ class ServerService {
   async startServer() {
     try {
       const config = await this.configProvider();
+      await this.validateRepository();
+      const ipAddress = this.ipAddressProvider();
+      if (!net.isIPv4(ipAddress)) {
+        throw new Error("Nenhuma interface de rede IPv4 está disponível para conexões.");
+      }
+      if (!Number.isInteger(this.port) || this.port < 0 || this.port > 65535) {
+        throw new Error("A porta configurada não é válida.");
+      }
+
       this.password = config.password;
       this.presenceService.configure({
-        maxUsers: config.maxUsers ?? DEFAULT_MAX_USERS,
-        allowedDeviceTypes: config.allowedDeviceTypes ?? [...DEVICE_TYPES]
+        maxUsers: config.maxUsersEnabled
+          ? config.maxUsers
+          : DEFAULT_MAX_USERS,
+        allowedDeviceTypes: config.allowedDeviceTypesEnabled
+          ? config.allowedDeviceTypes
+          : [...DEVICE_TYPES]
       });
       const app = this.appFactory({
         password: this.password,
+        passwordEnabled: config.passwordEnabled,
         presenceService: this.presenceService,
         repositoryPathProvider: this.repositoryPathProvider
       });
@@ -95,7 +114,7 @@ class ServerService {
           this.status = {
             running: true,
             host: this.host,
-            ip: getLocalIpAddress(),
+            ip: ipAddress,
             port: server.address().port,
             message: "Servidor iniciado e aguardando conexões"
           };
@@ -105,10 +124,42 @@ class ServerService {
 
       return this.getStatus();
     } catch (error) {
-      this.status.message = `Não foi possível iniciar: ${error.message}`;
-      throw error;
+      const message = error.code === "EADDRINUSE"
+        ? `A porta ${this.port} já está sendo usada por outro aplicativo.`
+        : error.message;
+      this.status.message = `Não foi possível iniciar: ${message}`;
+      throw new Error(message, { cause: error });
     } finally {
       this.startPromise = null;
+    }
+  }
+
+  async validateRepository() {
+    const configuredPath = await this.repositoryPathProvider();
+    if (typeof configuredPath !== "string" || !configuredPath.trim()) {
+      throw new Error("Selecione uma pasta de repositório antes de iniciar o servidor.");
+    }
+
+    let repositoryPath;
+    try {
+      repositoryPath = await fs.realpath(configuredPath);
+      const stats = await fs.stat(repositoryPath);
+      if (!stats.isDirectory()) {
+        throw new Error("O caminho configurado para o repositório não é uma pasta.");
+      }
+      await fs.access(repositoryPath, constants.R_OK | constants.W_OK);
+    } catch (error) {
+      if (error.code === "ENOENT" || error.code === "ENOTDIR") {
+        throw new Error("A pasta de repositório configurada não está disponível.", {
+          cause: error
+        });
+      }
+      if (error.code === "EACCES" || error.code === "EPERM") {
+        throw new Error("O aplicativo não tem permissão para ler e gravar na pasta de repositório.", {
+          cause: error
+        });
+      }
+      throw error;
     }
   }
 

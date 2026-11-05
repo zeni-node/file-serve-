@@ -11,13 +11,14 @@ test("creates missing JSON files with empty settings when the server starts", as
   const directory = await mkdtemp(path.join(os.tmpdir(), "file-server-config-"));
   const jsonDirectory = path.join(directory, "json");
   const configProvider = async () => {
-    await ensureJsonFiles({ directory: jsonDirectory });
+    await ensureJsonFiles({ directory: jsonDirectory, repositoryPath: directory });
     return readServerConfig({ directory: jsonDirectory });
   };
   const serverService = new ServerService({
     host: "127.0.0.1",
     port: 0,
-    configProvider
+    configProvider,
+    repositoryPathProvider: async () => directory
   });
   t.after(() => rm(directory, { recursive: true, force: true }));
 
@@ -34,13 +35,16 @@ test("creates missing JSON files with empty settings when the server starts", as
     JSON.parse(await readFile(path.join(jsonDirectory, "server.json"), "utf8")),
     {
       password: "",
+      passwordEnabled: false,
       maxUsers: 25,
-      allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+      maxUsersEnabled: false,
+      allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+      allowedDeviceTypesEnabled: false
     }
   );
   assert.deepEqual(
     JSON.parse(await readFile(path.join(jsonDirectory, "repository.json"), "utf8")),
-    { repositoryPath: null }
+    { repositoryPath: directory }
   );
 });
 
@@ -58,8 +62,11 @@ test("preserves existing JSON files when ensuring the configured list", async (t
   const config = await readServerConfig({ directory });
   assert.deepEqual(config, {
     password: "custom-password",
+    passwordEnabled: true,
     maxUsers: 12,
-    allowedDeviceTypes: ["mobile", "tv"]
+    maxUsersEnabled: true,
+    allowedDeviceTypes: ["mobile", "tv"],
+    allowedDeviceTypesEnabled: true
   });
   assert.equal(
     await readFile(configPath, "utf8"),
@@ -101,8 +108,11 @@ test("uses defaults for new settings in an existing server config", async (t) =>
 
   assert.deepEqual(await readServerConfig({ directory }), {
     password: "legacy",
+    passwordEnabled: true,
     maxUsers: 25,
-    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: false
   });
 });
 
@@ -116,6 +126,26 @@ test("rejects a user limit outside the supported range and invalid device types"
 
   await writeFile(configPath, '{"password":"","maxUsers":1,"allowedDeviceTypes":["robot"]}');
   await assert.rejects(readServerConfig({ directory }), /tipos de dispositivo válidos/);
+
+  await writeFile(configPath, '{"password":"","allowedDeviceTypes":[]}');
+  await assert.rejects(readServerConfig({ directory }), /pelo menos um tipo de dispositivo permitido/);
+  await writeFile(configPath, '{"password":"","allowedDeviceTypes":[],"allowedDeviceTypesEnabled":false}');
+  assert.deepEqual((await readServerConfig({ directory })).allowedDeviceTypes, []);
+  await writeFile(configPath, '{"password":"","allowedDeviceTypesEnabled":"false"}');
+  await assert.rejects(readServerConfig({ directory }), /deve ser verdadeiro ou falso/);
+
+  await writeFile(configPath, '{"password":"saved","passwordEnabled":"false"}');
+  await assert.rejects(readServerConfig({ directory }), /deve ser verdadeiro ou falso/);
+
+  await writeFile(configPath, '{"password":"","passwordEnabled":true}');
+  assert.deepEqual(await readServerConfig({ directory }), {
+    password: "",
+    passwordEnabled: true,
+    maxUsers: 25,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: false
+  });
 });
 
 test("saves server settings immediately without changing the configured password", async (t) => {
@@ -124,25 +154,33 @@ test("saves server settings immediately without changing the configured password
   await writeFile(configPath, JSON.stringify({
     password: "keep-this-password",
     maxUsers: 25,
-    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: true
   }));
   t.after(() => rm(directory, { recursive: true, force: true }));
 
   const settings = await saveServerSettings({
     directory,
     maxUsers: 8,
-    allowedDeviceTypes: ["mobile", "tv"]
+    allowedDeviceTypes: ["mobile", "tv"],
+    allowedDeviceTypesEnabled: true
   });
 
   assert.deepEqual(settings, {
     maxUsers: 8,
+    maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile", "tv"],
-    hasPassword: true
+    allowedDeviceTypesEnabled: true,
+    hasPassword: true,
+    hasSavedPassword: true
   });
   assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
     password: "keep-this-password",
+    passwordEnabled: true,
     maxUsers: 8,
-    allowedDeviceTypes: ["mobile", "tv"]
+    maxUsersEnabled: true,
+    allowedDeviceTypes: ["mobile", "tv"],
+    allowedDeviceTypesEnabled: true
   });
   await assert.rejects(saveServerSettings({
     directory,
@@ -151,7 +189,7 @@ test("saves server settings immediately without changing the configured password
   }), /entre 1 e 25/);
 });
 
-test("updates the server password without returning the secret", async (t) => {
+test("updates or disables the server password without returning the secret", async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "file-server-config-"));
   const configPath = path.join(directory, "server.json");
   await writeFile(configPath, JSON.stringify({
@@ -170,14 +208,156 @@ test("updates the server password without returning the secret", async (t) => {
 
   assert.deepEqual(settings, {
     maxUsers: 25,
+    maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
-    hasPassword: true
+    allowedDeviceTypesEnabled: false,
+    hasPassword: true,
+    hasSavedPassword: true
   });
   assert.equal(JSON.parse(await readFile(configPath, "utf8")).password, "new-password");
-  await assert.rejects(saveServerSettings({
+
+  const passwordlessSettings = await saveServerSettings({
     directory,
     maxUsers: 25,
     allowedDeviceTypes: ["mobile"],
-    password: ""
-  }), /senha entre 1 e 1024 caracteres/);
+    passwordEnabled: false
+  });
+  assert.deepEqual(passwordlessSettings, {
+    maxUsers: 25,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile"],
+    allowedDeviceTypesEnabled: false,
+    hasPassword: false,
+    hasSavedPassword: true
+  });
+  assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
+    password: "new-password",
+    passwordEnabled: false,
+    maxUsers: 25,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile"],
+    allowedDeviceTypesEnabled: false
+  });
+});
+
+test("saves password protection enabled when no password is configured", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "file-server-config-"));
+  const configPath = path.join(directory, "server.json");
+  await writeFile(configPath, JSON.stringify({
+    password: "",
+    passwordEnabled: false,
+    maxUsers: 25,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+  }));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+
+  const settings = await saveServerSettings({
+    directory,
+    maxUsers: 25,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    passwordEnabled: true
+  });
+
+  assert.equal(settings.hasPassword, true);
+  assert.equal(settings.hasSavedPassword, false);
+  assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
+    password: "",
+    passwordEnabled: true,
+    maxUsers: 25,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: false
+  });
+});
+
+test("stores a custom user limit while using the default maximum when disabled", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "file-server-config-"));
+  const configPath = path.join(directory, "server.json");
+  await writeFile(configPath, JSON.stringify({
+    password: "",
+    maxUsers: 25,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: true
+  }));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+
+  const settings = await saveServerSettings({
+    directory,
+    maxUsers: 4,
+    maxUsersEnabled: false,
+    allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+    allowedDeviceTypesEnabled: true
+  });
+
+  assert.equal(settings.maxUsers, 4);
+  assert.equal(settings.maxUsersEnabled, false);
+  const config = await readServerConfig({ directory });
+  assert.equal(config.maxUsers, 4);
+  assert.equal(config.maxUsersEnabled, false);
+
+  const presenceService = new (require("./presenceService").PresenceService)();
+  const serverService = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    configProvider: () => readServerConfig({ directory }),
+    presenceService,
+    repositoryPathProvider: async () => directory
+  });
+  await serverService.start();
+  assert.equal(presenceService.maxUsers, 25);
+  await serverService.stop();
+});
+
+test("allows all device types when filtering is off and requires a selection when on", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "file-server-config-"));
+  const configPath = path.join(directory, "server.json");
+  await writeFile(configPath, JSON.stringify({
+    password: "",
+    maxUsers: 25,
+    allowedDeviceTypes: ["mobile"],
+    allowedDeviceTypesEnabled: true
+  }));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+
+  const presenceService = new (require("./presenceService").PresenceService)();
+  const serverService = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    configProvider: () => readServerConfig({ directory }),
+    presenceService,
+    repositoryPathProvider: async () => directory
+  });
+  await serverService.start();
+  assert.equal(presenceService.allowedDeviceTypes.size, 1);
+  assert.equal(presenceService.allowedDeviceTypes.has("computer"), false);
+  await serverService.stop();
+
+  await assert.rejects(saveServerSettings({
+    directory,
+    maxUsers: 25,
+    allowedDeviceTypes: [],
+    allowedDeviceTypesEnabled: true
+  }), /pelo menos um tipo de dispositivo permitido/);
+  const settings = await saveServerSettings({
+    directory,
+    maxUsers: 25,
+    allowedDeviceTypes: [],
+    allowedDeviceTypesEnabled: false
+  });
+  assert.equal(settings.allowedDeviceTypesEnabled, false);
+
+  const unrestrictedPresence = new (require("./presenceService").PresenceService)();
+  const unrestrictedServer = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    configProvider: () => readServerConfig({ directory }),
+    presenceService: unrestrictedPresence,
+    repositoryPathProvider: async () => directory
+  });
+  await unrestrictedServer.start();
+  assert.equal(unrestrictedPresence.allowedDeviceTypes.size, 5);
+  assert.equal(unrestrictedPresence.allowedDeviceTypes.has("computer"), true);
+  assert.deepEqual((await readServerConfig({ directory })).allowedDeviceTypes, []);
+  await unrestrictedServer.stop();
 });

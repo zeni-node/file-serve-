@@ -1,11 +1,10 @@
 .connection-limit {
   grid-column: span 12;
-  display: flex;
-  flex-direction: column;
-  margin-top: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 18px;
   min-width: 0;
-  min-height: 150px;
   padding: 22px;
   border: 1px solid rgb(155 178 207 / 14%);
   border-radius: 16px;
@@ -14,28 +13,139 @@
 }
 
 .connection-limit .settings-section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  display: contents;
 }
 
-.connection-limit h2 {
+.connection-limit-title {
+  grid-column: 1;
+}
+
+.connection-limit-title-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fdfdfd;
+}
+
+.connection-limit-title-heading h2 {
   margin: 0;
   color: #edf2f7;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
 }
 
-.connection-limit .settings-section-heading p {
+.connection-limit-title > p {
   margin: 7px 0 0;
   color: #9eacbd;
   font-size: 13px;
   line-height: 1.5;
 }
 
-.connection-limit .settings-limit-control select {
-  min-width: 142px;
+.connection-limit-toggle {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  justify-self: end;
+  gap: 18px;
+  cursor: pointer;
+}
+
+.connection-limit-divider {
+  width: 1px;
+  height: 28px;
+  background: rgb(155 178 207 / 20%);
+}
+
+.connection-limit-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.connection-limit-switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border: 1px solid #53657d;
+  border-radius: 999px;
+  background: #0b1421;
+  transition: background-color 240ms ease, border-color 240ms ease;
+}
+
+.connection-limit-switch::after {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #9eacbd;
+  content: "";
+  transform: translateY(-50%);
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 240ms ease;
+}
+
+.connection-limit-toggle input:checked + .connection-limit-switch {
+  border-color: #3d6c9e;
+  background: #14283c;
+}
+
+.connection-limit-toggle input:checked + .connection-limit-switch::after {
+  transform: translate(18px, -50%) scale(1.08);
+  background: #8bc4ff;
+}
+
+.connection-limit-toggle input:focus-visible + .connection-limit-switch {
+  outline: 2px solid #6d9cff;
+  outline-offset: 3px;
+}
+
+.connection-limit-toggle input:disabled + .connection-limit-switch {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.connection-limit-details {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 260ms ease, opacity 180ms ease;
+}
+
+.connection-limit.is-expanded .connection-limit-details {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.connection-limit .settings-limit-control {
+  display: grid;
+  gap: 7px;
+  min-height: 0;
+  overflow: hidden;
+  color: #dce7f3;
+  font-size: 12px;
+}
+
+.connection-limit-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.connection-limit .settings-limit-control input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid #30445e;
   border-radius: 9px;
@@ -44,15 +154,62 @@
   font: inherit;
 }
 
-.connection-limit .settings-limit-control select:focus-visible {
-  outline: 2px solid #6d9cff;
-  outline-offset: 3px;
+.connection-limit .settings-limit-control input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
-.connection-limit .settings-hint {
-  margin: 14px 0 0;
-  color: #8290a3;
-  font-size: 12px;
+.connection-limit .settings-limit-control input[type="number"]::-webkit-inner-spin-button,
+.connection-limit .settings-limit-control input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.connection-limit .settings-limit-control input:focus-visible,
+.connection-limit-submit:focus-visible {
+  border-color: #6d9cff;
+  outline: none;
+}
+
+.connection-limit .settings-limit-control input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.connection-limit-submit {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 9px;
+  color: #f0f3f5;
+  background: #3d6c9e;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  transition: background-color 140ms ease, opacity 140ms ease;
+}
+
+.connection-limit-submit:hover:not(:disabled) {
+  background: #1d3854;
+}
+
+.connection-limit-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connection-limit-switch,
+  .connection-limit-switch::after,
+  .connection-limit-details {
+    transition: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .connection-limit {
+    grid-column: span 6;
+  }
 }
 
 @media (max-width: 560px) {
@@ -60,19 +217,16 @@
     grid-column: span 2;
   }
 
-  .connection-limit .settings-section-heading {
-    align-items: flex-start;
-    flex-direction: column;
+  .connection-limit-form {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .connection-limit .settings-limit-control,
-  .connection-limit .settings-limit-control select {
+  .connection-limit .settings-limit-control input {
     width: 100%;
   }
-}
 
-@media (min-width: 561px) and (max-width: 760px) {
-  .connection-limit {
-    grid-column: span 3;
+  .connection-limit-submit {
+    justify-self: start;
   }
 }

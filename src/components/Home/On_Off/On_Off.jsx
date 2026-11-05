@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Cable, Globe, LoaderCircle, Power, PowerOff, Server } from "lucide-react";
 import "./On_Off.css";
 
+const SERVER_TRANSITION_ANIMATION_DURATION_MS = 1100;
+
 export default function On_Off() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +49,7 @@ export default function On_Off() {
       return;
     }
 
+    const actionStartedAt = Date.now();
     const pendingAction = action === "stop" ? "stopping" : "starting";
     setBusyAction(pendingAction);
     setError("");
@@ -59,6 +62,11 @@ export default function On_Off() {
     } catch (requestError) {
       setError(`Não foi possível alterar o servidor: ${requestError.message}`);
     } finally {
+      const remainingAnimationTime = SERVER_TRANSITION_ANIMATION_DURATION_MS -
+        (Date.now() - actionStartedAt);
+      if (remainingAnimationTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingAnimationTime));
+      }
       setBusyAction(null);
     }
   }
@@ -68,20 +76,29 @@ export default function On_Off() {
   const statusLabel = loading
     ? "Consultando..."
     : busyAction === "starting"
-      ? "Ligando..."
+      ? "Validando e abrindo..."
       : busyAction === "stopping"
         ? "Desligando..."
         : isRunning
           ? "Ligado"
           : "Desligado";
+  const statusDescription = busyAction === "starting"
+    ? "Verificando configurações, pasta de arquivos, rede e disponibilidade da porta."
+    : busyAction === "stopping"
+      ? "Encerrando as conexões e liberando a porta."
+      : status?.message ?? "Aguardando ação.";
 
   return (
     <article
       className={`home-module server-module is-${statusClass}`}
       aria-label="Controle do servidor"
+      aria-busy={Boolean(busyAction)}
     >
       <header className="server-module-heading">
         <span className="server-module-icon" aria-hidden="true">
+          <span className="server-module-orbit">
+            <span className="server-module-orbit-dot" />
+          </span>
           <Server size={40} />
         </span>
         <div className="server-module-controls" aria-label="Controles do servidor">
@@ -115,6 +132,11 @@ export default function On_Off() {
           </button>
         </div>
       </header>
+
+      <div className="server-module-status" role="status" aria-live="polite">
+        <h2>{statusLabel}</h2>
+        <p>{statusDescription}</p>
+      </div>
 
       <dl className="server-module-details">
         <div>

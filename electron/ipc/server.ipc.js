@@ -7,8 +7,12 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
     const config = await readSettings();
     return {
       maxUsers: config.maxUsers,
+      maxUsersEnabled: config.maxUsersEnabled,
       allowedDeviceTypes: config.allowedDeviceTypes,
-      hasPassword: config.password.length > 0
+      allowedDeviceTypesEnabled: config.allowedDeviceTypesEnabled,
+      hasPassword: config.passwordEnabled ?? config.password.length > 0,
+      hasSavedPassword: config.password.length > 0,
+      password: config.password
     };
   });
   ipcMain.handle("server:save-settings", (_event, settings) => {

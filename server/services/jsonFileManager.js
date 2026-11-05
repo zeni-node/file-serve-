@@ -6,8 +6,11 @@ const JSON_FILES = [
     name: "server.json",
     createDefault: () => ({
       password: "",
+      passwordEnabled: false,
       maxUsers: 25,
-      allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"]
+      maxUsersEnabled: false,
+      allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
+      allowedDeviceTypesEnabled: false
     })
   },
   {

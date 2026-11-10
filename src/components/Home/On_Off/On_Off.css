@@ -6,9 +6,9 @@
   min-width: 0;
   min-height: 220px;
   padding: 22px;
-  box-shadow: 0 0 7px 2px #0000003f;
+  border: solid 1px #2c2d4036;
   border-radius: 16px;
-  color: #000000;
+  color: #2C2D40;
   background:#ffffff;
 }
 
@@ -46,7 +46,7 @@
   place-items: center;
   border: var(--server-module-contour-width) solid transparent;
   border-radius: 100%;
-  color: #010101;
+  color: #2C2D40;
   background:
     linear-gradient(#ffffff, #ffffff) padding-box,
     conic-gradient(
@@ -161,7 +161,8 @@
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    transform 170ms ease;
 }
 
 .server-module-toggle.is-stop {
@@ -182,6 +183,10 @@
   opacity: 0.20;
 }
 
+.server-module-toggle:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
 .server-module-spinner {
   animation: server-module-spin 900ms linear infinite;
 }
@@ -192,12 +197,12 @@
   gap: 0;
   margin: auto 0 0;
   padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.091);
+  border-top: 1px solid #2c2d4036;
 }
 
 .server-module-details > div + div {
   padding-left: 16px;
-  border-left: 1px solid rgb(155 178 207 / 12%);
+  border-left: 1px solid #2c2d4036;
 }
 
 .server-module-details .visually-hidden {
@@ -216,14 +221,14 @@
   gap: 8px;
   overflow: hidden;
   margin: 0;
-  color: #020202;
+  color: #7a838d;
   font-size: 13px;
   font-weight: 600;
 }
 
 .server-module-details dd svg {
   flex: 0 0 auto;
-  color: #8190a4;
+  color: #7a838d;
 }
 
 .server-module-details dd span {
@@ -258,6 +263,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .server-module-toggle {
+    transition: none;
+  }
+
   .server-module.is-starting .server-module-orbit,
   .server-module.is-stopping .server-module-orbit {
     animation: none;

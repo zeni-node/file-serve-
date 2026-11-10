@@ -52,8 +52,8 @@ function createWindow() {
     icon: getPublicAssetPath("logo_type", "logotipo.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: {
-      color: "#030d1c",
-      symbolColor: "#e7edf1",
+      color: "#ffffff",
+      symbolColor: "#000000",
       height: 44
     },
     autoHideMenuBar: true,

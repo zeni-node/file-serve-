@@ -1,14 +1,14 @@
 :root {
-  --chrome-color: #030d1c;
-  --chrome-border-color: #0d2140;
+  --chrome-color: #ffffff;
+  --chrome-border-color: #070707;
   --chrome-border-width: 1px;
   --window-corner-radius: 12px;
   --chrome-height: 44px;
   --sidebar-logo-size: 40px;
   --sidebar-icon-size: 56px;
   --sidebar-icon-background: transparent;
-  --sidebar-icon-hover-background: rgb(255 255 255 / 11%);
-  --sidebar-icon-active-background: rgb(255 255 255 / 15%);
+  --sidebar-icon-hover-background: rgba(0, 0, 0, 0.11);
+  --sidebar-icon-active-background: rgba(0, 0, 0, 0.15);
   font-family: "DM Sans", "Segoe UI", sans-serif;
   color: #202b3c;
   background: var(--chrome-color);
@@ -85,7 +85,7 @@ body {
   border-top: var(--chrome-border-width) solid var(--chrome-border-color);
   border-left: var(--chrome-border-width) solid var(--chrome-border-color);
   border-top-left-radius: var(--window-corner-radius);
-  background: #0d1827;
+  background: #ffffff;
 }
 
 .route-page {
@@ -148,7 +148,7 @@ body {
   place-items: center;
   border: none;
   border-radius: 12px;
-  color: #e7edf1;
+  color: #000000;
   background: var(--sidebar-icon-background);
   text-decoration: none;
   transition:
@@ -163,7 +163,7 @@ body {
 
 .sidebar-icon-link[aria-current="page"] {
   border-color: rgb(255 255 255 / 12%);
-  color: #fff;
+  color: #000000;
   background: var(--sidebar-icon-active-background);
 }
 

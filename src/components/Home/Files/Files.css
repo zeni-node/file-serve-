@@ -7,10 +7,10 @@
   min-width: 0;
   min-height: 130px;
   padding: 22px;
-  border: 1px solid rgb(155 178 207 / 14%);
+  box-shadow: 0 0 7px 2px #0000003f;
   border-radius: 16px;
-  color: #f0f3f5;
-  background: #030d1c;
+  color: #000000;
+  background: #fcfcfc;
 }
 
 .files-module-header {
@@ -36,12 +36,12 @@
   align-items: center;
   gap: 9px;
   min-width: 0;
-  color: #fcfcfc;
+  color: #000000;
 }
 
 .files-module-title h2 {
   overflow: hidden;
-  color: #f0f3f5;
+  color: #000000;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -54,7 +54,7 @@
   place-items: center;
   border: 0;
   border-radius: 11px;
-  color: #f0f3f5;
+  color: #000000;
   background: #0d1827;
   cursor: pointer;
   transition: background-color 140ms ease, opacity 140ms ease;

@@ -238,7 +238,7 @@
   font-weight: 600;
 }
 
-.server-module-details dd svg {
+.server-module-details dd > svg {
   flex: 0 0 auto;
   color: #7a838d;
 }

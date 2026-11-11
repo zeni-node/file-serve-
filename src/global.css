@@ -36,6 +36,7 @@ body {
 
 .app-shell {
   --sidebar-width: 100px;
+  --route-top-offset: 0px;
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
@@ -49,6 +50,7 @@ body {
 }
 
 .app-shell.has-titlebar {
+  --route-top-offset: var(--chrome-height);
   grid-template-rows: var(--chrome-height) minmax(0, 1fr);
 }
 
@@ -121,6 +123,7 @@ body {
 
 .app-sidebar {
   position: relative;
+  z-index: 1001;
   grid-column: 1;
   grid-row: 1;
   display: flex;

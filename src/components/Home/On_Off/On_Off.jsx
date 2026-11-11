@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Cable, Globe, LoaderCircle, Power, PowerOff, Server } from "lucide-react";
+import QRCode from "../QRCode/QRCode.jsx";
 import "./On_Off.css";
 
 const SERVER_STOP_ANIMATION_DURATION_MS = 1100;
@@ -92,6 +93,9 @@ export default function On_Off() {
   }
 
   const isRunning = status?.running === true;
+  const serverUrl = isRunning && status.ip && status.port
+    ? `http://${status.ip}:${status.port}`
+    : "";
   const statusClass = busyAction ?? (loading ? "unknown" : isRunning ? "running" : "stopped");
   const statusLabel = loading
     ? "Consultando..."
@@ -180,6 +184,7 @@ export default function On_Off() {
           <dd aria-label={`Porta: ${status?.port ?? "indisponível"}`}>
             <Cable size={16} aria-hidden="true" />
             <span>{status?.port ?? "—"}</span>
+            <QRCode isRunning={isRunning} serverUrl={serverUrl} />
           </dd>
         </div>
       </dl>

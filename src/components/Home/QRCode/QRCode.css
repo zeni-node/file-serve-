@@ -1,0 +1,119 @@
+.home-qr-toggle,
+.home-qr-close {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #2c2d4036;
+  border-radius: 8px;
+  color: #2C2D40;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+.home-qr-toggle {
+  flex: 0 0 32px;
+  margin-left: auto;
+  margin-right: 12px;
+}
+
+.home-qr-toggle:hover:not(:disabled),
+.home-qr-close:hover {
+  color: #ffffff;
+  background: #2C2D40;
+}
+
+.home-qr-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.home-qr-backdrop {
+  position: fixed;
+  z-index: 0;
+  top: calc(var(--route-top-offset, 0px) + var(--chrome-border-width, 0px));
+  right: 0;
+  bottom: 0;
+  left: calc(var(--sidebar-width, 0px) + var(--chrome-border-width, 0px));
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  border-top-left-radius: var(--window-corner-radius, 0px);
+  background: #111827a8;
+}
+
+.home-qr-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 380px);
+  padding: 28px;
+  border: 1px solid #2c2d4036;
+  border-radius: 16px;
+  color: #2C2D40;
+  background: #ffffff;
+  box-shadow: 0 20px 60px #00000040;
+  text-align: center;
+}
+
+.home-qr-dialog h2 {
+  margin: 0;
+  padding-right: 22px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.home-qr-dialog p {
+  margin: 0;
+  color: #7a838d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.home-qr-dialog img,
+.home-qr-placeholder {
+  box-sizing: border-box;
+  display: grid;
+  width: min(100%, 240px);
+  height: 240px;
+  place-items: center;
+  border: 1px solid #2c2d4036;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.home-qr-dialog img {
+  padding: 8px;
+}
+
+.home-qr-placeholder {
+  padding: 16px;
+  color: #7a3030;
+  font-size: 13px;
+}
+
+.home-qr-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  flex: 0 0 32px;
+}
+
+@media (max-width: 560px) {
+  .home-qr-dialog {
+    padding: 24px 18px;
+  }
+
+  .home-qr-dialog img,
+  .home-qr-placeholder {
+    width: min(100%, 210px);
+    height: 210px;
+  }
+}

@@ -20,7 +20,13 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
     saveQueue = savePromise.catch(() => undefined);
     return savePromise;
   });
-  ipcMain.handle("server:start", () => serverService.start());
+  ipcMain.handle("server:start", (event) => serverService.start({
+    onProgress: (progress) => {
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:startup-progress", progress);
+      }
+    }
+  }));
   ipcMain.handle("server:stop", () => serverService.stop());
 }
 

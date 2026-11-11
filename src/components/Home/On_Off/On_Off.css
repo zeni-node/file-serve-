@@ -6,10 +6,10 @@
   min-width: 0;
   min-height: 220px;
   padding: 22px;
-  border: 1px solid rgb(155 178 207 / 14%);
+  border: solid 1px #2c2d4036;
   border-radius: 16px;
-  color: #f0f3f5;
-  background:#030d1c;
+  color: #2C2D40;
+  background:#ffffff;
 }
 
 @media (max-width: 760px) {
@@ -46,9 +46,9 @@
   place-items: center;
   border: var(--server-module-contour-width) solid transparent;
   border-radius: 100%;
-  color: #fcfcfc;
+  color: #2C2D40;
   background:
-    linear-gradient(#030d1c, #030d1c) padding-box,
+    linear-gradient(#ffffff, #ffffff) padding-box,
     conic-gradient(
       from var(--server-module-orbit-angle),
       var(--server-module-progress-color) 0deg var(--server-module-ring-progress),
@@ -74,7 +74,7 @@
   z-index: 2;
   inset: calc(0px - var(--server-module-contour-width) / 2);
   border-radius: 50%;
-  transform: rotate(var(--server-module-orbit-angle));
+  transform: rotate(calc(var(--server-module-orbit-angle) + var(--server-module-orbit-rotation, 0deg)));
   pointer-events: none;
 }
 
@@ -86,7 +86,7 @@
   width: calc(var(--server-module-orbit-dot-size) + var(--server-module-orbit-gap-size));
   height: calc(var(--server-module-orbit-dot-size) + var(--server-module-orbit-gap-size));
   border-radius: 50%;
-  background: #030d1c;
+  background: #ffffff;
   content: "";
   transform: translate(-50%, -50%);
 }
@@ -98,7 +98,7 @@
   left: 50%;
   width: var(--server-module-orbit-dot-size);
   height: var(--server-module-orbit-dot-size);
-  border: 2px solid #030d1c;
+  border: 1px solid #fdfdfd;
   border-radius: 50%;
   background: var(--server-module-indicator-color);
   transform: translate(-50%, -50%);
@@ -123,10 +123,20 @@
 .server-module.is-starting .server-module-icon,
 .server-module.is-stopping .server-module-icon {
   --server-module-progress-color: #facc15;
+}
+
+.server-module.is-starting .server-module-icon {
+  transition: --server-module-ring-progress 450ms ease-out;
+}
+
+.server-module.is-starting .server-module-orbit {
+  transition: transform 450ms ease-out;
+}
+
+.server-module.is-stopping .server-module-icon {
   animation: server-module-ring-fill 1s linear 1 both;
 }
 
-.server-module.is-starting .server-module-orbit,
 .server-module.is-stopping .server-module-orbit {
   animation: server-module-orbit 1s linear 1 both;
 }
@@ -142,6 +152,8 @@
 
 .server-module.is-running .server-module-icon {
   --server-module-indicator-color: #4ade80;
+  --server-module-progress-color: #4ade80;
+  --server-module-ring-progress: 360deg;
 }
 
 .server-module.is-starting .server-module-orbit-dot,
@@ -161,7 +173,8 @@
   transition:
     background-color 140ms ease,
     border-color 140ms ease,
-    color 140ms ease;
+    color 140ms ease,
+    transform 170ms ease;
 }
 
 .server-module-toggle.is-stop {
@@ -182,6 +195,10 @@
   opacity: 0.20;
 }
 
+.server-module-toggle:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
 .server-module-spinner {
   animation: server-module-spin 900ms linear infinite;
 }
@@ -192,12 +209,12 @@
   gap: 0;
   margin: auto 0 0;
   padding-top: 16px;
-  border-top: 1px solid rgb(155 178 207 / 12%);
+  border-top: 1px solid #2c2d4036;
 }
 
 .server-module-details > div + div {
   padding-left: 16px;
-  border-left: 1px solid rgb(155 178 207 / 12%);
+  border-left: 1px solid #2c2d4036;
 }
 
 .server-module-details .visually-hidden {
@@ -216,14 +233,14 @@
   gap: 8px;
   overflow: hidden;
   margin: 0;
-  color: #e6edf5;
+  color: #7a838d;
   font-size: 13px;
   font-weight: 600;
 }
 
 .server-module-details dd svg {
   flex: 0 0 auto;
-  color: #8190a4;
+  color: #7a838d;
 }
 
 .server-module-details dd span {
@@ -258,15 +275,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .server-module.is-starting .server-module-orbit,
+  .server-module-toggle {
+    transition: none;
+  }
+
+  .server-module.is-starting .server-module-orbit {
+    transition: none;
+  }
+
+  .server-module.is-starting .server-module-icon {
+    transition: none;
+  }
+
   .server-module.is-stopping .server-module-orbit {
     animation: none;
     transform: rotate(var(--server-module-orbit-angle));
   }
 
-  .server-module.is-starting .server-module-icon,
   .server-module.is-stopping .server-module-icon {
-    --server-module-ring-progress: 0deg;
     animation: none;
   }
 

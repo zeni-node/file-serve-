@@ -1,14 +1,14 @@
 :root {
-  --chrome-color: #030d1c;
-  --chrome-border-color: #0d2140;
+  --chrome-color: #ffffff;
+  --chrome-border-color: rgba(0, 0, 0, 0.06);
   --chrome-border-width: 1px;
   --window-corner-radius: 12px;
   --chrome-height: 44px;
   --sidebar-logo-size: 40px;
   --sidebar-icon-size: 56px;
   --sidebar-icon-background: transparent;
-  --sidebar-icon-hover-background: rgb(255 255 255 / 11%);
-  --sidebar-icon-active-background: rgb(255 255 255 / 15%);
+  --sidebar-icon-hover-background: rgba(119, 119, 119, 0.11);
+  --sidebar-icon-active-background: rgba(92, 92, 92, 0.15);
   font-family: "DM Sans", "Segoe UI", sans-serif;
   color: #202b3c;
   background: var(--chrome-color);
@@ -35,8 +35,9 @@ body {
 }
 
 .app-shell {
+  --sidebar-width: 100px;
   display: grid;
-  grid-template-columns: 100px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   width: 100%;
   height: 100vh;
@@ -85,7 +86,7 @@ body {
   border-top: var(--chrome-border-width) solid var(--chrome-border-color);
   border-left: var(--chrome-border-width) solid var(--chrome-border-color);
   border-top-left-radius: var(--window-corner-radius);
-  background: #0d1827;
+  background: #F7F6F9;
 }
 
 .route-page {
@@ -119,28 +120,33 @@ body {
 }
 
 .app-sidebar {
+  position: relative;
   grid-column: 1;
   grid-row: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: visible;
   padding: 20px 16px 24px;
   color: #f0f3f5;
   background: var(--chrome-color);
 }
 
 .sidebar-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   width: 100%;
+  transform: translateY(-50%);
 }
 
 .sidebar-icon-link {
+  position: relative;
   display: grid;
   flex: 0 0 var(--sidebar-icon-size);
   width: var(--sidebar-icon-size);
@@ -148,7 +154,7 @@ body {
   place-items: center;
   border: none;
   border-radius: 12px;
-  color: #e7edf1;
+  color: #2c2d409a;
   background: var(--sidebar-icon-background);
   text-decoration: none;
   transition:
@@ -163,8 +169,71 @@ body {
 
 .sidebar-icon-link[aria-current="page"] {
   border-color: rgb(255 255 255 / 12%);
-  color: #fff;
+  color: #2C2D40;
   background: var(--sidebar-icon-active-background);
+}
+
+.sidebar-active-marker {
+  position: absolute;
+  top: 50%;
+  left: calc(
+    100% +
+    ((var(--sidebar-width) - var(--sidebar-icon-size)) / 2) -
+    8px
+  );
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  width: 8px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 15px 0 0 15px;
+  color: #fff;
+  background: #2C2D40;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.sidebar-route-label {
+  position: absolute;
+  top: 50%;
+  left: calc(
+    100% +
+    ((var(--sidebar-width) - var(--sidebar-icon-size)) / 2) +
+    2px
+  );
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100vw - var(--sidebar-width) - 24px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #2C2D40;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    visibility 0s linear 450ms;
+}
+
+.sidebar-icon-link:hover .sidebar-route-label,
+.sidebar-icon-link:focus-visible .sidebar-route-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -50%);
+  transition-delay: 800ms, 800ms, 0s;
 }
 
 .sidebar-icon-link:focus-visible {
@@ -197,7 +266,8 @@ body {
 
 @media (max-width: 760px) {
   .app-shell {
-    grid-template-columns: 190px minmax(0, 1fr);
+    --sidebar-width: 190px;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   }
 
   .app-sidebar {
@@ -214,7 +284,8 @@ body {
 
 @media (max-width: 560px) {
   .app-shell {
-    grid-template-columns: 150px minmax(0, 1fr);
+    --sidebar-width: 150px;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   }
 
   .route-area,

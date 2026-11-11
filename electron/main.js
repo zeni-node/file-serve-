@@ -20,6 +20,9 @@ function getJsonDirectory() {
 }
 
 const serverService = new ServerService({
+  startupStepDelayMs: process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS === undefined
+    ? 500
+    : Number(process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS),
   configProvider: async () => {
     const repositoryPath = await readRepositoryPath(app);
     await ensureJsonFiles({
@@ -52,12 +55,12 @@ function createWindow() {
     icon: getPublicAssetPath("logo_type", "logotipo.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: {
-      color: "#030d1c",
-      symbolColor: "#e7edf1",
+      color: "#ffffff",
+      symbolColor: "#000000",
       height: 44
     },
     autoHideMenuBar: true,
-    backgroundColor: "#0b1421",
+    backgroundColor: "#000000",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,

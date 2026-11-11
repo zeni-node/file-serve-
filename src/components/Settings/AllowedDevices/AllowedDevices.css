@@ -7,10 +7,10 @@
   gap: 18px;
   min-width: 0;
   padding: 22px;
-  border: 1px solid rgb(155 178 207 / 14%);
+  border: 1px solid #2c2d4036;
   border-radius: 16px;
-  color: #f0f3f5;
-  background: #030d1c;
+  color: #2C2D40;
+  background: #ffffff;
 }
 
 .allowed-devices .settings-section-heading {
@@ -25,19 +25,19 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #ffffff;
+  color: #2C2D40;
 }
 
 .allowed-devices h2 {
   margin: 0;
-  color: #edf2f7;
+  color: #2C2D40;
   font-size: 18px;
   font-weight: 600;
 }
 
 .allowed-devices-title > p {
   margin: 7px 0 0;
-  color: #9eacbd;
+  color: #7a838d;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -55,7 +55,7 @@
 .allowed-devices-divider {
   width: 1px;
   height: 28px;
-  background: rgb(155 178 207 / 20%);
+  background: #2c2d4036;
 }
 
 .allowed-devices-toggle input,
@@ -76,9 +76,9 @@
   width: 42px;
   height: 24px;
   flex: 0 0 auto;
-  border: 1px solid #53657d;
+  border: 1px solid #2c2d4050;
   border-radius: 999px;
-  background: #0b1421;
+  background: #f1f2f4;
   transition: background-color 240ms ease, border-color 240ms ease;
 }
 
@@ -90,7 +90,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #9eacbd;
+  background: #7a838d;
   content: "";
   transform: translateY(-50%);
   transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -99,19 +99,19 @@
 
 .allowed-devices-toggle input:checked + .allowed-devices-switch,
 .allowed-devices-option-toggle input:checked + .allowed-devices-option-switch {
-  border-color: #3d6c9e;
-  background: #14283c;
+  border: none;
+  background: #00ff59;
 }
 
 .allowed-devices-toggle input:checked + .allowed-devices-switch::after,
 .allowed-devices-option-toggle input:checked + .allowed-devices-option-switch::after {
   transform: translate(18px, -50%) scale(1.08);
-  background: #8bc4ff;
+  background: #ffffff;
 }
 
 .allowed-devices-toggle input:focus-visible + .allowed-devices-switch,
 .allowed-devices-option-toggle input:focus-visible + .allowed-devices-option-switch {
-  outline: 2px solid #6d9cff;
+  outline: 2px solid #2C2D40;
   outline-offset: 3px;
 }
 
@@ -150,23 +150,17 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid #273951;
+  border: none;
   border-radius: 12px;
-  color: #a7b2c0;
-  background: #0d1827;
+  color: #2C2D40;
+  background: #f2f2f2;
   cursor: pointer;
   font-size: 13px;
   transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
 }
 
 .allowed-devices-option:hover {
-  border-color: #536b8a;
-}
-
-.allowed-devices-option.is-allowed {
-  border-color: #3d6c9e;
-  color: #f0f3f5;
-  background: #14283c;
+  border-color: #2C2D40;
 }
 
 .allowed-devices-option-title {
@@ -178,11 +172,7 @@
 
 .allowed-devices-option-title svg {
   flex: 0 0 auto;
-  color: #8092a9;
-}
-
-.allowed-devices-option.is-allowed .allowed-devices-option-title svg {
-  color: #8bc4ff;
+  color: #7a838d;
 }
 
 .allowed-devices-option-toggle {

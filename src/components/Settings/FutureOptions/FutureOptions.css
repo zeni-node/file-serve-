@@ -5,10 +5,10 @@
   align-items: center;
   gap: 14px;
   padding: 20px 22px;
-  border: 1px dashed rgb(155 178 207 / 28%);
+  border: 1px dashed #2c2d4050;
   border-radius: 16px;
-  color: #f0f3f5;
-  background: #030d1c;
+  color: #2C2D40;
+  background: #fcfcfc;
 }
 
 .settings-future-options-icon {
@@ -18,20 +18,20 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 10px;
-  color: #8bc4ff;
-  background: #14283c;
+  color: #2C2D40;
+  background: #f1f2f4;
 }
 
 .settings-future-options h2 {
   margin: 0;
-  color: #edf2f7;
+  color: #2C2D40;
   font-size: 16px;
   font-weight: 600;
 }
 
 .settings-future-options p {
   margin: 6px 0 0;
-  color: #9eacbd;
+  color: #7a838d;
   font-size: 13px;
   line-height: 1.5;
 }

@@ -79,9 +79,14 @@ export default function App() {
                 href={`#/${routeId}`}
                 aria-label={page.name}
                 aria-current={route === routeId ? "page" : undefined}
-                title={page.name}
               >
                 <Icon className="sidebar-icon" aria-hidden="true" />
+                {route === routeId && (
+                  <span className="sidebar-active-marker" aria-hidden="true" />
+                )}
+                <span className="sidebar-route-label" aria-hidden="true">
+                  {page.name}
+                </span>
               </a>
             );
           })}

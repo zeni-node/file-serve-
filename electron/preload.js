@@ -6,6 +6,11 @@ contextBridge.exposeInMainWorld("fileServer", {
   getSettings: () => ipcRenderer.invoke("server:get-settings"),
   saveSettings: (settings) => ipcRenderer.invoke("server:save-settings", settings),
   start: () => ipcRenderer.invoke("server:start"),
+  onStartupProgress: (callback) => {
+    const listener = (_event, progress) => callback(progress);
+    ipcRenderer.on("server:startup-progress", listener);
+    return () => ipcRenderer.removeListener("server:startup-progress", listener);
+  },
   stop: () => ipcRenderer.invoke("server:stop"),
   getRepositoryPath: () => ipcRenderer.invoke("repository:get-path"),
   selectRepositoryDirectory: () => ipcRenderer.invoke("repository:select-directory")

@@ -20,6 +20,9 @@ function getJsonDirectory() {
 }
 
 const serverService = new ServerService({
+  startupStepDelayMs: process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS === undefined
+    ? 500
+    : Number(process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS),
   configProvider: async () => {
     const repositoryPath = await readRepositoryPath(app);
     await ensureJsonFiles({

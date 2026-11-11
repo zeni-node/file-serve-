@@ -44,3 +44,37 @@ test("exposes the saved password to the settings UI", async () => {
     password: "private-server-password"
   });
 });
+
+test("forwards server startup progress to the requesting renderer", async () => {
+  const handlers = new Map();
+  const sentMessages = [];
+  const ipcMain = {
+    handle: (channel, handler) => handlers.set(channel, handler)
+  };
+  const serverService = {
+    getStatus: () => ({}),
+    getOnlineUsers: () => [],
+    start: ({ onProgress }) => {
+      onProgress({ progress: 20, message: "Validando a pasta de arquivos..." });
+      return Promise.resolve({ running: true });
+    },
+    stop: () => {}
+  };
+
+  registerServerIpc(ipcMain, serverService, {
+    readSettings: async () => ({}),
+    saveSettings: async () => ({})
+  });
+
+  const result = await handlers.get("server:start")({
+    sender: {
+      isDestroyed: () => false,
+      send: (...message) => sentMessages.push(message)
+    }
+  });
+  assert.deepEqual(result, { running: true });
+  assert.deepEqual(sentMessages, [[
+    "server:startup-progress",
+    { progress: 20, message: "Validando a pasta de arquivos..." }
+  ]]);
+});

@@ -35,8 +35,17 @@ class ServerService {
     appFactory = createApp,
     presenceService = new PresenceService(),
     repositoryPathProvider = async () => null,
-    ipAddressProvider = getLocalIpAddress
+    ipAddressProvider = getLocalIpAddress,
+    startupStepDelayMs = 0
   } = {}) {
+    if (
+      !Number.isInteger(startupStepDelayMs) ||
+      startupStepDelayMs < 0 ||
+      startupStepDelayMs > 60000
+    ) {
+      throw new TypeError("O atraso de simulação deve ser um número inteiro entre 0 e 60000 ms.");
+    }
+
     this.host = host;
     this.port = port;
     this.password = password;
@@ -45,6 +54,7 @@ class ServerService {
     this.presenceService = presenceService;
     this.repositoryPathProvider = repositoryPathProvider;
     this.ipAddressProvider = ipAddressProvider;
+    this.startupStepDelayMs = startupStepDelayMs;
     this.server = null;
     this.startPromise = null;
     this.status = {
@@ -65,7 +75,7 @@ class ServerService {
     return this.presenceService.getOnlineUsers();
   }
 
-  start() {
+  start({ onProgress } = {}) {
     if (this.server) {
       return Promise.resolve(this.getStatus());
     }
@@ -74,14 +84,17 @@ class ServerService {
       return this.startPromise;
     }
 
-    this.startPromise = this.startServer();
+    this.startPromise = this.startServer(onProgress);
     return this.startPromise;
   }
 
-  async startServer() {
+  async startServer(onProgress) {
     try {
+      await this.reportStartupProgress(onProgress, 0, "Carregando configurações...");
       const config = await this.configProvider();
+      await this.reportStartupProgress(onProgress, 20, "Validando a pasta de arquivos...");
       await this.validateRepository();
+      await this.reportStartupProgress(onProgress, 40, "Verificando a rede e a porta...");
       const ipAddress = this.ipAddressProvider();
       if (!net.isIPv4(ipAddress)) {
         throw new Error("Nenhuma interface de rede IPv4 está disponível para conexões.");
@@ -90,6 +103,7 @@ class ServerService {
         throw new Error("A porta configurada não é válida.");
       }
 
+      await this.reportStartupProgress(onProgress, 60, "Aplicando as configurações...");
       this.password = config.password;
       this.presenceService.configure({
         maxUsers: config.maxUsersEnabled
@@ -105,6 +119,7 @@ class ServerService {
         presenceService: this.presenceService,
         repositoryPathProvider: this.repositoryPathProvider
       });
+      await this.reportStartupProgress(onProgress, 80, "Abrindo a porta...");
       const server = app.listen(this.port, this.host);
 
       await new Promise((resolve, reject) => {
@@ -118,6 +133,7 @@ class ServerService {
             port: server.address().port,
             message: "Servidor iniciado e aguardando conexões"
           };
+          onProgress?.({ progress: 100, message: "Servidor iniciado." });
           resolve();
         });
       });
@@ -131,6 +147,13 @@ class ServerService {
       throw new Error(message, { cause: error });
     } finally {
       this.startPromise = null;
+    }
+  }
+
+  async reportStartupProgress(onProgress, progress, message) {
+    onProgress?.({ progress, message });
+    if (this.startupStepDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.startupStepDelayMs));
     }
   }
 

@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const net = require("node:net");
 const { once } = require("node:events");
+const { performance } = require("node:perf_hooks");
 const { mkdtemp, rm } = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
@@ -34,14 +35,53 @@ test("validates startup and serves health checks after opening the port", async 
     await rm(repositoryPath, { recursive: true, force: true });
   });
 
-  const status = await service.start();
+  const progressUpdates = [];
+  const status = await service.start({
+    onProgress: (progress) => progressUpdates.push(progress)
+  });
   assert.equal(status.running, true);
   assert.equal(status.ip, "192.168.1.10");
   assert.ok(status.port > 0);
+  assert.deepEqual(progressUpdates.map(({ progress }) => progress), [0, 20, 40, 60, 80, 100]);
+  assert.deepEqual(progressUpdates.map(({ message }) => message), [
+    "Carregando configurações...",
+    "Validando a pasta de arquivos...",
+    "Verificando a rede e a porta...",
+    "Aplicando as configurações...",
+    "Abrindo a porta...",
+    "Servidor iniciado."
+  ]);
 
   const response = await fetch(`http://127.0.0.1:${status.port}/health`);
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { status: "ok", service: "123456" });
+});
+
+test("holds each startup stage for the configured simulation delay", async (t) => {
+  const repositoryPath = await createRepository();
+  const service = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    startupStepDelayMs: 20,
+    configProvider: async () => validConfig,
+    repositoryPathProvider: async () => repositoryPath,
+    ipAddressProvider: () => "192.168.1.10"
+  });
+  t.after(async () => {
+    await service.stop();
+    await rm(repositoryPath, { recursive: true, force: true });
+  });
+
+  const progressUpdates = [];
+  const startedAt = performance.now();
+  const status = await service.start({
+    onProgress: (progress) => progressUpdates.push(progress)
+  });
+  const elapsedMs = performance.now() - startedAt;
+
+  assert.equal(status.running, true);
+  assert.deepEqual(progressUpdates.map(({ progress }) => progress), [0, 20, 40, 60, 80, 100]);
+  assert.ok(elapsedMs >= 100, `O atraso simulado não foi aplicado: ${elapsedMs} ms`);
 });
 
 test("does not start without a configured repository folder", async () => {

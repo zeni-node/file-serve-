@@ -1,5 +1,6 @@
 import "./SettingsHeading.css";
 
+// Apresenta o título principal da página de configurações.
 export default function SettingsHeading() {
   return (
     <header className="settings-heading">

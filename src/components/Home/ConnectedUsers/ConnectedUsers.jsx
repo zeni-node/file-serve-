@@ -18,6 +18,7 @@ const deviceIcons = {
   unknown: CircleHelp
 };
 
+// Exibe as conexões ativas e atualiza os dados periodicamente.
 export default function ConnectedUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,9 +52,11 @@ export default function ConnectedUsers() {
     }
 
     refreshUsers();
+    // Atualiza a lista a cada três segundos enquanto o componente estiver montado.
     const intervalId = window.setInterval(refreshUsers, 3_000);
 
     return () => {
+      // Impede atualizações após desmontar a tela e encerra o temporizador.
       active = false;
       window.clearInterval(intervalId);
     };
@@ -92,7 +95,7 @@ export default function ConnectedUsers() {
             return (
               <li key={`${user.name}-${user.lastSeenAt}`}>
                 <span className="connected-users-device-icon" aria-hidden="true">
-                  <DeviceIcon size={20} />
+                  <DeviceIcon size={25} />
                 </span>
                 <span className="connected-users-user">
                   <span className="connected-users-name">{user.name}</span>

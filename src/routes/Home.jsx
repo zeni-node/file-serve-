@@ -4,6 +4,7 @@ import ConnectedUsers from "../components/Home/ConnectedUsers/ConnectedUsers.jsx
 import Files from "../components/Home/Files/Files.jsx";
 import "../components/Home/Home.css";
 
+// Compõe os módulos da tela inicial na ordem em que aparecem na página.
 export default function Home() {
   return (
     <div className="home-modules">

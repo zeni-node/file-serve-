@@ -1,3 +1,4 @@
+/* Cartão de configuração do limite de conexões. */
 .connection-limit {
   grid-column: span 12;
   display: grid;
@@ -12,6 +13,7 @@
   background: #ffffff;
 }
 
+/* Cabeçalho: descrição à esquerda e alternância à direita. */
 .connection-limit .settings-section-heading {
   display: contents;
 }
@@ -91,6 +93,7 @@
     background-color 240ms ease;
 }
 
+/* Estados ativo, foco e desabilitado do controle de alternância. */
 .connection-limit-toggle input:checked + .connection-limit-switch {
   border: none;
   background: #00ff59;
@@ -124,6 +127,7 @@
   opacity: 1;
 }
 
+/* Campo numérico e botão para salvar o limite escolhido. */
 .connection-limit .settings-limit-control {
   display: grid;
   gap: 7px;
@@ -198,6 +202,7 @@
   opacity: 0.3;
 }
 
+/* Remove transições quando o usuário prefere movimento reduzido. */
 @media (prefers-reduced-motion: reduce) {
   .connection-limit-switch,
   .connection-limit-switch::after,
@@ -206,12 +211,14 @@
   }
 }
 
+/* A seção ocupa a grade inteira em telas menores. */
 @media (max-width: 760px) {
   .connection-limit {
     grid-column: span 6;
   }
 }
 
+/* Empilha o campo e o botão em telas estreitas. */
 @media (max-width: 560px) {
   .connection-limit {
     grid-column: span 2;

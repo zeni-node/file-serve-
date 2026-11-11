@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import QRCodeGenerator from "qrcode";
 import "./QRCode.css";
 
+// Exibe o QR Code do endereço do servidor em uma janela sobre a área da rota.
 export default function QRCode({ isRunning, serverUrl }) {
   const [isOpen, setIsOpen] = useState(false);
   const [qrCode, setQrCode] = useState("");
@@ -26,6 +27,7 @@ export default function QRCode({ isRunning, serverUrl }) {
       };
     }
 
+    // Gera a imagem apenas com a janela aberta e o servidor disponível.
     QRCodeGenerator.toDataURL(serverUrl, {
       errorCorrectionLevel: "H",
       margin: 2,
@@ -63,6 +65,7 @@ export default function QRCode({ isRunning, serverUrl }) {
   }, [isOpen]);
 
   const appShell = document.querySelector(".app-shell");
+  // O portal tira o fundo do contexto animado do cartão para cobrir a rota inteira.
   const qrDialog = isOpen && isRunning && serverUrl
     ? (
       <div

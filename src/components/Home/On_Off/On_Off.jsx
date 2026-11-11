@@ -5,6 +5,7 @@ import "./On_Off.css";
 
 const SERVER_STOP_ANIMATION_DURATION_MS = 1100;
 
+// Controla o servidor local e apresenta estado, endereço e progresso da inicialização.
 export default function On_Off() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,7 @@ export default function On_Off() {
 
     if (action === "start") {
       setStartupProgress({ progress: 0, message: "Carregando configurações..." });
+      // Recebe atualizações de progresso enviadas pelo processo principal do Electron.
       unsubscribeProgress = window.fileServer.onStartupProgress(setStartupProgress);
     }
 
@@ -79,6 +81,7 @@ export default function On_Off() {
       setError(`Não foi possível alterar o servidor: ${requestError.message}`);
     } finally {
       unsubscribeProgress();
+      // Mantém a animação de desligamento visível por tempo suficiente para concluir.
       const remainingAnimationTime = action === "stop"
         ? SERVER_STOP_ANIMATION_DURATION_MS - (Date.now() - actionStartedAt)
         : 0;

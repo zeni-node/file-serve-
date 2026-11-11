@@ -1,3 +1,4 @@
+/* Grade responsiva que organiza os módulos da página de configurações. */
 .settings-modules {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -8,18 +9,21 @@
   animation: settings-modules-enter 220ms ease-out both;
 }
 
+/* Reduz a grade para telas médias. */
 @media (max-width: 760px) {
   .settings-modules {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
+/* Usa duas colunas em telas estreitas. */
 @media (max-width: 560px) {
   .settings-modules {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
+/* Anima a entrada dos módulos da página. */
 @keyframes settings-modules-enter {
   from {
     opacity: 0;

@@ -1,3 +1,4 @@
+/* Variáveis e padrões globais da janela e da interface. */
 :root {
   --chrome-color: #ffffff;
   --chrome-border-color: rgba(0, 0, 0, 0.06);
@@ -14,11 +15,13 @@
   background: var(--chrome-color);
 }
 
+/* Normaliza dimensões e seleção de texto dos elementos. */
 * {
   box-sizing: border-box;
   user-select: none;
 }
 
+/* A aplicação ocupa a janela inteira; a rolagem fica na área de rota. */
 html,
 body,
 #root {
@@ -34,6 +37,7 @@ body {
   height: 100%;
 }
 
+/* Grade principal com navegação fixa e conteúdo da rota. */
 .app-shell {
   --sidebar-width: 100px;
   --route-top-offset: 0px;
@@ -49,11 +53,13 @@ body {
   background: var(--chrome-color);
 }
 
+/* Reserva a linha superior usada pela barra de título do Electron. */
 .app-shell.has-titlebar {
   --route-top-offset: var(--chrome-height);
   grid-template-rows: var(--chrome-height) minmax(0, 1fr);
 }
 
+/* Barra arrastável da janela do aplicativo desktop. */
 .window-titlebar {
   z-index: 1;
   grid-column: 1 / -1;
@@ -67,6 +73,7 @@ body {
   user-select: none;
 }
 
+/* Logotipo no topo da navegação lateral. */
 .sidebar-logo {
   display: block;
   flex: 0 0 var(--sidebar-logo-size);
@@ -77,6 +84,7 @@ body {
   user-select: none;
 }
 
+/* Área rolável onde cada rota é exibida. */
 .route-area {
   grid-column: 2;
   grid-row: 1;
@@ -91,6 +99,7 @@ body {
   background: #F7F6F9;
 }
 
+/* Largura, posição e animação comuns às páginas internas. */
 .route-page {
   width: min(100%, 1120px);
   margin: clamp(48px, 10vh, 104px) auto 0;
@@ -121,6 +130,7 @@ body {
   line-height: 1.7;
 }
 
+/* Navegação persistente à esquerda das rotas. */
 .app-sidebar {
   position: relative;
   z-index: 1001;
@@ -136,6 +146,7 @@ body {
   background: var(--chrome-color);
 }
 
+/* Agrupa e centraliza verticalmente os links de navegação. */
 .sidebar-nav {
   position: absolute;
   top: 50%;
@@ -148,6 +159,7 @@ body {
   transform: translateY(-50%);
 }
 
+/* Botão de navegação para cada rota. */
 .sidebar-icon-link {
   position: relative;
   display: grid;
@@ -176,6 +188,7 @@ body {
   background: var(--sidebar-icon-active-background);
 }
 
+/* Marcador da rota atualmente selecionada. */
 .sidebar-active-marker {
   position: absolute;
   top: 50%;
@@ -197,6 +210,7 @@ body {
   transform: translateY(-50%);
 }
 
+/* Rótulo exibido ao passar o mouse ou focar um link. */
 .sidebar-route-label {
   position: absolute;
   top: 50%;
@@ -250,6 +264,7 @@ body {
   stroke-width: 1.8;
 }
 
+/* Transição de entrada do conteúdo da rota. */
 @keyframes route-enter {
   from {
     opacity: 0;
@@ -262,11 +277,13 @@ body {
   }
 }
 
+/* Posiciona rota e navegação abaixo da barra de título. */
 .has-titlebar .route-area,
 .has-titlebar .app-sidebar {
   grid-row: 2;
 }
 
+/* Ajustes de navegação e espaçamento para telas médias. */
 @media (max-width: 760px) {
   .app-shell {
     --sidebar-width: 190px;
@@ -285,6 +302,7 @@ body {
 
 }
 
+/* Ajustes de grade e espaçamento para telas estreitas. */
 @media (max-width: 560px) {
   .app-shell {
     --sidebar-width: 150px;

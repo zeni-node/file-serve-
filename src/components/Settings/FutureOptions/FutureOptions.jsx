@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 import "./FutureOptions.css";
 
+// Indica o espaço reservado para futuras configurações.
 export default function FutureOptions() {
   return (
     <section className="settings-future-options" aria-labelledby="settings-future-options-title">

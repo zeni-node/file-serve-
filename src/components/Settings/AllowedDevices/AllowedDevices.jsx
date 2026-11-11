@@ -10,6 +10,7 @@ const DEVICE_OPTIONS = [
   { id: "unknown", label: "Outros dispositivos", Icon: Monitor }
 ];
 
+// Define quais categorias de dispositivo podem conectar ao servidor.
 export default function AllowedDevices({
   allowedDeviceTypes,
   enabled,
@@ -28,6 +29,7 @@ export default function AllowedDevices({
     const nextEnabled = event.target.checked;
     setIsEnabled(nextEnabled);
     if (!(await onToggle(nextEnabled))) {
+      // Reverte a interface se a gravação não for concluída.
       setIsEnabled(!nextEnabled);
     }
   }

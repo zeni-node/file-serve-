@@ -1,3 +1,4 @@
+/* Cabeçalho da página, ocupando toda a largura da grade. */
 .settings-heading {
   box-sizing: border-box;
   grid-column: 1 / -1;
@@ -6,6 +7,7 @@
   font-family: "DM Sans", "Segoe UI", sans-serif;
 }
 
+/* Tipografia principal da página de configurações. */
 .settings-heading__title {
   margin: 0;
   color: #2C2D40;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Folder, FolderOpen, LoaderCircle } from "lucide-react";
 import "./Files.css";
 
+// Permite consultar e selecionar o diretório que armazena os arquivos do servidor.
 export default function Files() {
   const [repositoryPath, setRepositoryPath] = useState(null);
   const [loading, setLoading] = useState(true);

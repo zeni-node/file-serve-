@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Folder, FolderOpen, LoaderCircle } from "lucide-react";
 import "./Files.css";
 
+// Permite consultar e escolher a pasta local usada como repositório de arquivos.
 export default function Files() {
   const [repositoryPath, setRepositoryPath] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -11,6 +12,7 @@ export default function Files() {
   useEffect(() => {
     let active = true;
 
+    // A seleção de pastas depende da API disponibilizada pelo aplicativo desktop.
     if (!window.fileServer) {
       setLoading(false);
       setError("A seleção da pasta está disponível somente no aplicativo desktop.");
@@ -51,6 +53,7 @@ export default function Files() {
     setError("");
 
     try {
+      // O diálogo nativo pode ser cancelado sem alterar a pasta atual.
       const result = await window.fileServer.selectRepositoryDirectory();
       if (!result.canceled) {
         setRepositoryPath(result.repositoryPath);

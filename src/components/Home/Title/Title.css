@@ -1,3 +1,4 @@
+/* Ocupa toda a largura da grade como cabeçalho da página inicial. */
 .home-heading {
   box-sizing: border-box;
   grid-column: 1 / -1;
@@ -6,6 +7,7 @@
   font-family: "DM Sans", "Segoe UI", sans-serif;
 }
 
+/* Define escala, peso e espaçamento do título da página. */
 .home-heading__title {
   margin: 0;
   color: #2C2D40;

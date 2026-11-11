@@ -1,3 +1,4 @@
+// Página provisória para a área de gerenciamento do repositório local.
 export default function LocalRepository() {
   return (
     <section className="route-page">

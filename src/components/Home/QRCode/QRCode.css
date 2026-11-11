@@ -1,3 +1,4 @@
+/* Ícone acionável ao lado da porta e botão de fechar da janela. */
 .home-qr-toggle,
 .home-qr-close {
   display: grid;
@@ -33,6 +34,7 @@
   opacity: 0.35;
 }
 
+/* Fundo modal limitado à área da rota, preservando a navegação lateral. */
 .home-qr-backdrop {
   position: fixed;
   z-index: 0;
@@ -47,6 +49,7 @@
   background: #111827a8;
 }
 
+/* Janela central com o QR Code e instruções para acesso pelo celular. */
 .home-qr-dialog {
   position: relative;
   display: flex;
@@ -106,6 +109,7 @@
   flex: 0 0 32px;
 }
 
+/* Redimensiona o QR Code e a janela em telas pequenas. */
 @media (max-width: 560px) {
   .home-qr-dialog {
     padding: 24px 18px;

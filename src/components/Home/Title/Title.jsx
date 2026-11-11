@@ -1,5 +1,6 @@
 import "./Title.css";
 
+// Apresenta o título principal da página inicial.
 export default function HomeHeading() {
   return (
     <header className="home-heading">

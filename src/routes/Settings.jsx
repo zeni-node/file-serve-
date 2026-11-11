@@ -7,6 +7,7 @@ import PasswordField from "../components/Settings/PasswordField/PasswordField.js
 import SettingsHeading from "../components/Settings/Title/SettingsHeading.jsx";
 import "../components/Settings/Settings.css";
 
+// Valores usados enquanto as configurações salvas ainda estão sendo carregadas.
 const DEFAULT_SETTINGS = {
   maxUsers: 25,
   maxUsersEnabled: false,
@@ -17,10 +18,12 @@ const DEFAULT_SETTINGS = {
   password: ""
 };
 
+// Coordena a leitura, atualização e persistência das configurações da tela.
 export default function Settings() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saveState, setSaveState] = useState("idle");
+  // Identifica a gravação mais recente para ignorar respostas antigas.
   const saveSequence = useRef(0);
 
   useEffect(() => {
@@ -92,6 +95,7 @@ export default function Settings() {
     }
   }
 
+  // Os módulos recebem valores e ações por propriedades; a persistência fica nesta rota.
   function updateMaxUsers(maxUsers) {
     return persistSettings({ ...settings, maxUsers }, { maxUsersEnabled: true });
   }
@@ -105,6 +109,7 @@ export default function Settings() {
       ? [...new Set([...settings.allowedDeviceTypes, deviceType])]
       : settings.allowedDeviceTypes.filter((type) => type !== deviceType);
     if (allowedDeviceTypes.length === 0) {
+      // O servidor exige pelo menos uma categoria quando o filtro está ativo.
       return;
     }
     persistSettings({ ...settings, allowedDeviceTypes });

@@ -1,3 +1,4 @@
+/* Chamada visual que indica recursos de configuração planejados. */
 .settings-future-options {
   grid-column: span 12;
   display: flex;
@@ -11,6 +12,7 @@
   background: #fcfcfc;
 }
 
+/* Ícone decorativo da mensagem de novidades. */
 .settings-future-options-icon {
   display: grid;
   width: 40px;
@@ -22,6 +24,7 @@
   background: #f1f2f4;
 }
 
+/* Título e descrição do espaço reservado. */
 .settings-future-options h2 {
   margin: 0;
   color: #2C2D40;
@@ -36,6 +39,7 @@
   line-height: 1.5;
 }
 
+/* A faixa ocupa a largura disponível em telas menores. */
 @media (max-width: 760px) {
   .settings-future-options {
     grid-column: span 6;

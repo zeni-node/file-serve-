@@ -4,6 +4,7 @@ import "./PasswordField.css";
 
 const MAX_PASSWORD_LENGTH = 20;
 
+// Controla a exigência e a atualização da senha de acesso ao servidor.
 export default function PasswordField({
   hasPassword,
   hasSavedPassword,
@@ -29,6 +30,7 @@ export default function PasswordField({
     const nextEnabled = event.target.checked;
     setEnabled(nextEnabled);
     if (!nextEnabled) {
+      // Oculta a senha quando a proteção é desligada.
       setPasswordVisible(false);
     }
 
@@ -39,6 +41,7 @@ export default function PasswordField({
 
   async function handleSave(event) {
     event.preventDefault();
+    // Evita enviar valores vazios ou maiores que o limite suportado.
     if (!password || password.length > MAX_PASSWORD_LENGTH) {
       return;
     }

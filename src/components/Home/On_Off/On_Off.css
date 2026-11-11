@@ -1,3 +1,4 @@
+/* Cartão de status e controles do servidor local. */
 .server-module {
   grid-column: span 8;
   display: flex;
@@ -12,18 +13,21 @@
   background:#ffffff;
 }
 
+/* O cartão ocupa menos colunas conforme a tela diminui. */
 @media (max-width: 760px) {
   .server-module {
     grid-column: span 3;
   }
 }
 
+/* Em telas estreitas, o cartão ocupa as duas colunas disponíveis. */
 @media (max-width: 560px) {
   .server-module {
     grid-column: span 2;
   }
 }
 
+/* Cabeçalho, indicador circular e controles de ligar/desligar. */
 .server-module-heading {
   display: flex;
   align-items: center;
@@ -63,12 +67,14 @@
   --server-module-ring-progress: 0deg;
 }
 
+/* Permite animar o preenchimento do anel de progresso. */
 @property --server-module-ring-progress {
   syntax: "<angle>";
   inherits: false;
   initial-value: 0deg;
 }
 
+/* Ponto orbital que acompanha o progresso de inicialização. */
 .server-module-orbit {
   position: absolute;
   z-index: 2;
@@ -104,6 +110,7 @@
   transform: translate(-50%, -50%);
 }
 
+/* Texto do estado atual do servidor. */
 .server-module-status h2 {
   margin: 0;
   font-size: 15px;
@@ -120,6 +127,7 @@
   line-height: 1.45;
 }
 
+/* Estados visuais de inicialização e desligamento. */
 .server-module.is-starting .server-module-icon,
 .server-module.is-stopping .server-module-icon {
   --server-module-progress-color: #facc15;
@@ -161,6 +169,7 @@
   background: var(--server-module-progress-color);
 }
 
+/* Botões para ligar e desligar o servidor. */
 .server-module-toggle {
   display: grid;
   flex: 0 0 56px;
@@ -203,6 +212,7 @@
   animation: server-module-spin 900ms linear infinite;
 }
 
+/* Endereço IP e porta usados para acessar o servidor. */
 .server-module-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -249,6 +259,7 @@
   white-space: nowrap;
 }
 
+/* Mensagens de erro da operação do servidor. */
 .server-module-error {
   margin: -8px 0 0;
   color: #fecaca;
@@ -256,6 +267,7 @@
   line-height: 1.45;
 }
 
+/* Animações do indicador, anel e progresso orbital. */
 @keyframes server-module-spin {
   to {
     transform: rotate(360deg);

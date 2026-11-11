@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { UsersRound } from "lucide-react";
 import "./ConnectionLimit.css";
 
+// Permite ativar um limite personalizado e escolher o número máximo de conexões.
 export default function ConnectionLimit({
   value,
   enabled,
@@ -33,6 +34,7 @@ export default function ConnectionLimit({
   async function handleSave(event) {
     event.preventDefault();
     const nextLimit = Number(limit);
+    // Mantém o valor dentro do intervalo aceito pelo servidor.
     if (!Number.isInteger(nextLimit) || nextLimit < 1 || nextLimit > 25) {
       return;
     }

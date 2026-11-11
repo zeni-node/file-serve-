@@ -5,6 +5,7 @@ import LocalRepository from "./routes/LocalRepository.jsx";
 import SettingsPage from "./routes/Settings.jsx";
 import UsersPage from "./routes/Users.jsx";
 
+// Mantém os metadados e componentes das páginas usados pela navegação lateral.
 const routes = {
   house: {
     name: "Início",
@@ -34,6 +35,7 @@ const routes = {
 
 function getCurrentRoute() {
   const route = window.location.hash.replace(/^#\/?/, "");
+  // Links inexistentes sempre retornam à página inicial.
   return Object.hasOwn(routes, route) ? route : "house";
 }
 
@@ -43,6 +45,7 @@ export default function App() {
   const isDesktopApp = window.isDesktopApp === true;
 
   useEffect(() => {
+    // Sincroniza a tela com as mudanças de rota feitas pelo hash da URL.
     function handleRouteChange() {
       setRoute(getCurrentRoute());
     }

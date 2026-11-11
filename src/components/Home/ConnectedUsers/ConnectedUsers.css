@@ -1,11 +1,12 @@
+/* Cartão completo de usuários conectados. */
 .connected-users-module {
-  grid-column: span 4;
   display: flex;
   flex-direction: column;
-  margin-top: -289px;
   gap: 18px;
+  grid-column: span 4;
   min-width: 0;
   min-height: 350px;
+  margin-top: -303px;
   padding: 22px;
   border: solid 1px #2c2d4036;
   border-radius: 16px;
@@ -13,6 +14,7 @@
   background: #ffffff;
 }
 
+/* Cabeçalho: ícone, título e quantidade de conexões. */
 .connected-users-header {
   display: flex;
   align-items: center;
@@ -21,6 +23,7 @@
   border-bottom: 1px solid #2c2d4036;
 }
 
+/* Ícone que identifica a seção. */
 .connected-users-icon {
   display: grid;
   flex: 0 0 40px;
@@ -30,15 +33,17 @@
   border-radius: 50%;
 }
 
+/* Área flexível do título e do contador. */
 .connected-users-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex: 1;
   gap: 12px;
   min-width: 0;
-  flex: 1;
 }
 
+/* Título do cabeçalho. */
 .connected-users-heading h2 {
   overflow: hidden;
   margin: 0;
@@ -48,6 +53,22 @@
   white-space: nowrap;
 }
 
+/* Contador de dispositivos conectados. */
+.connected-users-count {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  color: #2C2D40;
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mensagens de carregamento, erro ou ausência de conexões. */
 .connected-users-message {
   margin: auto 0;
   color: #a7b2c0;
@@ -56,6 +77,7 @@
   text-align: center;
 }
 
+/* Lista de dispositivos, exibida quando há conexões. */
 .connected-users-list {
   display: grid;
   align-content: start;
@@ -67,6 +89,7 @@
   list-style: none;
 }
 
+/* Linha individual de cada dispositivo conectado. */
 .connected-users-list li {
   display: flex;
   align-items: center;
@@ -79,6 +102,7 @@
   font-size: 12px;
 }
 
+/* Ícone correspondente ao tipo de dispositivo. */
 .connected-users-device-icon {
   display: grid;
   flex: 0 0 34px;
@@ -86,9 +110,10 @@
   height: 34px;
   place-items: center;
   border-radius: 9px;
-  color: #ffffff;
+  color: #2C2D40;
 }
 
+/* Nome e identificação do dispositivo. */
 .connected-users-user {
   display: grid;
   flex: 1;
@@ -96,6 +121,27 @@
   min-width: 0;
 }
 
+/* Nome e modelo podem ser longos; o excesso é cortado. */
+.connected-users-name,
+.connected-users-device {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cor e tamanho do nome do usuário. */
+.connected-users-name {
+  color: #2C2D40;
+  font-weight: 600;
+}
+
+/* Cor e tamanho do nome do dispositivo. */
+.connected-users-device {
+  color: #a7b2c0;
+  font-size: 11px;
+}
+
+/* Indicador visual de opções da linha. */
 .connected-users-menu-indicator {
   display: grid;
   flex: 0 0 34px;
@@ -112,43 +158,14 @@
   background: rgb(253 253 253 / 15%);
 }
 
-.connected-users-name,
-.connected-users-device {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.connected-users-name {
-  color: #e6edf5;
-  font-weight: 600;
-}
-
-.connected-users-device {
-  color: #9aaabd;
-  font-size: 11px;
-}
-
-.connected-users-count {
-  display: grid;
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 50%;
-  color: #dce7f3;
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+/* Ajusta a largura do cartão conforme o espaço disponível. */
 @media (max-width: 760px) {
   .connected-users-module {
     grid-column: span 3;
   }
 }
 
+/* Em telas estreitas, o cartão ocupa as duas colunas. */
 @media (max-width: 560px) {
   .connected-users-module {
     grid-column: span 2;

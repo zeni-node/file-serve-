@@ -1,3 +1,4 @@
+/* Cartão que agrupa as opções de compatibilidade de dispositivos. */
 .allowed-devices {
   grid-column: span 12;
   display: grid;
@@ -13,6 +14,7 @@
   background: #ffffff;
 }
 
+/* Cabeçalho com explicação e controle geral de ativação. */
 .allowed-devices .settings-section-heading {
   display: contents;
 }
@@ -58,6 +60,7 @@
   background: #2c2d4036;
 }
 
+/* Esconde o checkbox nativo sem remover sua acessibilidade. */
 .allowed-devices-toggle input,
 .allowed-devices-option-toggle input {
   position: absolute;
@@ -69,6 +72,7 @@
   clip-path: inset(50%);
 }
 
+/* Aparência dos controles deslizantes gerais e individuais. */
 .allowed-devices-switch,
 .allowed-devices-option-switch {
   position: relative;
@@ -121,6 +125,7 @@
   opacity: 0.55;
 }
 
+/* Área expansível com a lista de tipos de dispositivo. */
 .allowed-devices-details {
   display: grid;
   grid-column: 1 / -1;
@@ -142,6 +147,7 @@
   overflow: hidden;
 }
 
+/* Linha de configuração de cada categoria de dispositivo. */
 .allowed-devices-option {
   display: flex;
   min-width: 0;
@@ -182,6 +188,7 @@
   cursor: pointer;
 }
 
+/* A seção ocupa a largura disponível em telas menores. */
 @media (max-width: 760px) {
   .allowed-devices {
     grid-column: span 6;
@@ -194,6 +201,7 @@
   }
 }
 
+/* Respeita a preferência do sistema por movimento reduzido. */
 @media (prefers-reduced-motion: reduce) {
   .allowed-devices-switch,
   .allowed-devices-switch::after,

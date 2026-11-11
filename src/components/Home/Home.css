@@ -1,3 +1,4 @@
+/* Organiza os módulos da página inicial em uma grade responsiva. */
 .home-modules {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -8,18 +9,21 @@
   animation: home-modules-enter 220ms ease-out both;
 }
 
+/* Reduz o número de colunas em telas médias. */
 @media (max-width: 760px) {
   .home-modules {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
+/* Usa duas colunas em telas estreitas. */
 @media (max-width: 560px) {
   .home-modules {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
+/* Anima a entrada dos módulos ao abrir a página inicial. */
 @keyframes home-modules-enter {
   from {
     opacity: 0;

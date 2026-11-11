@@ -1,3 +1,4 @@
+// Página provisória para o gerenciamento de usuários.
 export default function Users() {
   return (
     <section className="route-page">

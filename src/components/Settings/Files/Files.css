@@ -1,3 +1,4 @@
+/* Cartão de seleção do repositório na página de configurações. */
 .settings-modules .files-module {
   grid-column: span 12;
   display: flex;
@@ -13,6 +14,7 @@
   background: #fcfcfc;
 }
 
+/* Cabeçalho e título do cartão. */
 .settings-modules .files-module-header {
   padding-bottom: 16px;
   border-bottom: 1px solid #2c2d4036;
@@ -60,6 +62,7 @@
   white-space: nowrap;
 }
 
+/* Texto auxiliar que explica a seleção do repositório. */
 .settings-modules .files-module-title p {
   margin: 6px 0 0;
   color: #7a838d;
@@ -67,6 +70,7 @@
   line-height: 1.5;
 }
 
+/* Botão de seleção e estado de carregamento do diálogo de pastas. */
 .settings-modules .files-module-select {
   position: relative;
   display: inline-flex;
@@ -135,6 +139,7 @@
   opacity: 1;
 }
 
+/* Caminho selecionado e mensagem de erro da operação. */
 .settings-modules .files-module-path {
   overflow-wrap: anywhere;
   margin: 0;
@@ -150,12 +155,14 @@
   line-height: 1.45;
 }
 
+/* Indicador animado enquanto o diálogo está em processamento. */
 @keyframes files-module-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+/* Ajusta a largura do cartão conforme o tamanho da grade. */
 @media (max-width: 760px) {
   .settings-modules .files-module {
     grid-column: span 3;

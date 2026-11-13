@@ -78,7 +78,7 @@ export default function On_Off() {
         setStartupProgress({ progress: 100, message: "Servidor iniciado." });
       }
     } catch (requestError) {
-      setError(`Não foi possível alterar o servidor: ${requestError.message}`);
+      console.error("Não foi possível alterar o servidor.", requestError);
     } finally {
       unsubscribeProgress();
       // Mantém a animação de desligamento visível por tempo suficiente para concluir.

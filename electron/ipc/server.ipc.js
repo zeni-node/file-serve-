@@ -20,14 +20,42 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
     saveQueue = savePromise.catch(() => undefined);
     return savePromise;
   });
-  ipcMain.handle("server:start", (event) => serverService.start({
-    onProgress: (progress) => {
+  ipcMain.handle("server:start", async (event) => {
+    try {
+      return await serverService.start({
+        onProgress: (progress) => {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send("server:startup-progress", progress);
+          }
+        }
+      });
+    } catch (error) {
       if (!event.sender.isDestroyed()) {
-        event.sender.send("server:startup-progress", progress);
+        event.sender.send("server:notification", {
+          text: "Não foi possível iniciar o servidor",
+          description: error instanceof Error ? error.message : String(error),
+          color: "error",
+          icon: "error"
+        });
       }
+      throw error;
     }
-  }));
-  ipcMain.handle("server:stop", () => serverService.stop());
+  });
+  ipcMain.handle("server:stop", async (event) => {
+    try {
+      return await serverService.stop();
+    } catch (error) {
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Não foi possível parar o servidor",
+          description: error instanceof Error ? error.message : String(error),
+          color: "error",
+          icon: "error"
+        });
+      }
+      throw error;
+    }
+  });
 }
 
 module.exports = { registerServerIpc };

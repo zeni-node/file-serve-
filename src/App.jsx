@@ -4,6 +4,7 @@ import Home from "./routes/Home.jsx";
 import LocalRepository from "./routes/LocalRepository.jsx";
 import SettingsPage from "./routes/Settings.jsx";
 import UsersPage from "./routes/Users.jsx";
+import NotificationProvider from "./components/NotificationGlobal/notification.jsx";
 
 // Mantém os metadados e componentes das páginas usados pela navegação lateral.
 const routes = {
@@ -40,6 +41,14 @@ function getCurrentRoute() {
 }
 
 export default function App() {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
+  );
+}
+
+function AppContent() {
   const [route, setRoute] = useState(getCurrentRoute);
   const RouteComponent = routes[route].component;
   const isDesktopApp = window.isDesktopApp === true;

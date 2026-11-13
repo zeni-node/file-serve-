@@ -78,3 +78,41 @@ test("forwards server startup progress to the requesting renderer", async () => 
     { progress: 20, message: "Validando a pasta de arquivos..." }
   ]]);
 });
+
+test("forwards server errors as notifications and preserves the rejected request", async () => {
+  const handlers = new Map();
+  const sentMessages = [];
+  const ipcMain = {
+    handle: (channel, handler) => handlers.set(channel, handler)
+  };
+  const serverError = new Error("A porta já está sendo usada.");
+  const serverService = {
+    getStatus: () => ({}),
+    getOnlineUsers: () => [],
+    start: () => Promise.reject(serverError),
+    stop: () => Promise.resolve({})
+  };
+
+  registerServerIpc(ipcMain, serverService, {
+    readSettings: async () => ({}),
+    saveSettings: async () => ({})
+  });
+
+  const event = {
+    sender: {
+      isDestroyed: () => false,
+      send: (...message) => sentMessages.push(message)
+    }
+  };
+
+  await assert.rejects(handlers.get("server:start")(event), serverError);
+  assert.deepEqual(sentMessages, [[
+    "server:notification",
+    {
+      text: "Não foi possível iniciar o servidor",
+      description: serverError.message,
+      color: "error",
+      icon: "error"
+    }
+  ]]);
+});

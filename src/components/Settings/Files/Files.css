@@ -1,36 +1,8 @@
-/* Cartão de seleção do repositório na página de configurações. */
-.settings-modules .files-module {
-  grid-column: span 12;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  align-self: start;
-  min-width: 0;
-  min-height: 130px;
-  padding: 22px;
-  border: 1px solid #2c2d4036;
-  border-radius: 16px;
-  color: #2C2D40;
-  background: #fcfcfc;
-}
-
-/* Cabeçalho e título do cartão. */
-.settings-modules .files-module-header {
-  padding-bottom: 16px;
-  border-bottom: 1px solid #2c2d4036;
-}
-
 .settings-modules .files-module-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-}
-
-.settings-modules .files-module-heading h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .settings-modules .files-module-title {
@@ -39,35 +11,10 @@
   color: #2C2D40;
 }
 
-.settings-modules .files-module-title-copy {
-  min-width: 0;
-}
-
-.settings-modules .files-module-title-heading {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.settings-modules .files-module-title-heading > svg {
-  flex: 0 0 auto;
-}
-
 .settings-modules .files-module-title-heading h2 {
-  margin: 0;
-  font-size: 18px;
   overflow: hidden;
-  color: #2C2D40;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Texto auxiliar que explica a seleção do repositório. */
-.settings-modules .files-module-title p {
-  margin: 6px 0 0;
-  color: #7a838d;
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 /* Botão de seleção e estado de carregamento do diálogo de pastas. */
@@ -159,18 +106,5 @@
 @keyframes files-module-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-/* Ajusta a largura do cartão conforme o tamanho da grade. */
-@media (max-width: 760px) {
-  .settings-modules .files-module {
-    grid-column: span 3;
-  }
-}
-
-@media (max-width: 560px) {
-  .settings-modules .files-module {
-    grid-column: span 2;
   }
 }

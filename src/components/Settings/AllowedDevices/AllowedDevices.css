@@ -1,47 +1,6 @@
-/* Cartão que agrupa as opções de compatibilidade de dispositivos. */
-.allowed-devices {
-  grid-column: span 12;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  margin-top: 0;
-  gap: 18px;
-  min-width: 0;
-  padding: 22px;
-  border: 1px solid #2c2d4036;
-  border-radius: 16px;
-  color: #2C2D40;
-  background: #ffffff;
-}
-
 /* Cabeçalho com explicação e controle geral de ativação. */
 .allowed-devices .settings-section-heading {
   display: contents;
-}
-
-.allowed-devices-title {
-  grid-column: 1;
-}
-
-.allowed-devices-title-heading {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: #2C2D40;
-}
-
-.allowed-devices h2 {
-  margin: 0;
-  color: #2C2D40;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.allowed-devices-title > p {
-  margin: 7px 0 0;
-  color: #7a838d;
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 .allowed-devices-toggle {
@@ -186,19 +145,6 @@
   align-items: center;
   flex: 0 0 auto;
   cursor: pointer;
-}
-
-/* A seção ocupa a largura disponível em telas menores. */
-@media (max-width: 760px) {
-  .allowed-devices {
-    grid-column: span 6;
-  }
-}
-
-@media (max-width: 560px) {
-  .allowed-devices {
-    grid-column: span 2;
-  }
 }
 
 /* Respeita a preferência do sistema por movimento reduzido. */

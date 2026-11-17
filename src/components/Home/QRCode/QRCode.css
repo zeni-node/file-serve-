@@ -6,7 +6,7 @@
   height: 32px;
   place-items: center;
   padding: 0;
-  border: 1px solid #2c2d4036;
+  border: none;
   border-radius: 8px;
   color: #2C2D40;
   background: transparent;
@@ -19,19 +19,16 @@
 
 .home-qr-toggle {
   flex: 0 0 32px;
-  margin-left: auto;
-  margin-right: 12px;
 }
 
 .home-qr-toggle:hover:not(:disabled),
 .home-qr-close:hover {
-  color: #ffffff;
-  background: #2C2D40;
+  color: #7a838d;
 }
 
 .home-qr-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.35;
+  cursor: default;
+  opacity: 0;
 }
 
 /* Fundo modal limitado à área da rota, preservando a navegação lateral. */

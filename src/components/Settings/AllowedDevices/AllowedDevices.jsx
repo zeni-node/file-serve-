@@ -36,12 +36,12 @@ export default function AllowedDevices({
 
   return (
     <section
-      className={`settings-section allowed-devices${isEnabled ? " is-expanded" : ""}`}
+      className={`settings-card settings-section allowed-devices${isEnabled ? " is-expanded" : ""}`}
       aria-labelledby="settings-devices-title"
     >
       <div className="settings-section-heading">
-        <div className="allowed-devices-title">
-          <div className="allowed-devices-title-heading">
+        <div className="settings-card-heading allowed-devices-title">
+          <div className="settings-card-heading-title allowed-devices-title-heading">
             <Monitor size={21} aria-hidden="true" />
             <h2 id="settings-devices-title">Compatibilidade avançada de dispositivos</h2>
           </div>

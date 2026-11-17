@@ -63,12 +63,12 @@ export default function ConnectionLimit({
 
   return (
     <section
-      className={`settings-section connection-limit${isEnabled ? " is-expanded" : ""}`}
+      className={`settings-card settings-section connection-limit${isEnabled ? " is-expanded" : ""}`}
       aria-labelledby="settings-capacity-title"
     >
       <div className="settings-section-heading">
-        <div className="connection-limit-title">
-          <div className="connection-limit-title-heading">
+        <div className="settings-card-heading connection-limit-title">
+          <div className="settings-card-heading-title connection-limit-title-heading">
             <UsersRound size={21} aria-hidden="true" />
             <h2 id="settings-capacity-title">Limite avançado de usuários</h2>
           </div>

@@ -9,7 +9,7 @@ import NotificationProvider from "./components/NotificationGlobal/notification.j
 // Mantém os metadados e componentes das páginas usados pela navegação lateral.
 const routes = {
   house: {
-    name: "Início",
+    name: "Servidor",
     description: "Página inicial do aplicativo.",
     icon: House,
     component: Home,

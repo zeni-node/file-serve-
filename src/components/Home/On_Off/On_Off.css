@@ -117,16 +117,6 @@
   font-weight: 600;
 }
 
-.server-module-status p {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 6px 0 0;
-  color: #a7b2c0;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
 /* Estados visuais de inicialização e desligamento. */
 .server-module.is-starting .server-module-icon,
 .server-module.is-stopping .server-module-icon {
@@ -150,10 +140,6 @@
 }
 
 .server-module.is-starting .server-module-status h2,
-.server-module.is-starting .server-module-status p {
-  color: #facc15;
-}
-
 .server-module.is-stopping .server-module-status h2 {
   color: #facc15;
 }
@@ -212,14 +198,23 @@
   animation: server-module-spin 900ms linear infinite;
 }
 
-/* Endereço IP e porta usados para acessar o servidor. */
+/* Endereço IP, porta e ação do QR Code no rodapé do cartão. */
+.server-module-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #2c2d4036;
+}
+
 .server-module-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
-  margin: auto 0 0;
-  padding-top: 16px;
-  border-top: 1px solid #2c2d4036;
+  min-width: 0;
+  margin: 0;
 }
 
 .server-module-details > div + div {
@@ -257,14 +252,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Mensagens de erro da operação do servidor. */
-.server-module-error {
-  margin: -8px 0 0;
-  color: #fecaca;
-  font-size: 11px;
-  line-height: 1.45;
 }
 
 /* Animações do indicador, anel e progresso orbital. */

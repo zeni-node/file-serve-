@@ -56,7 +56,7 @@ test("forwards server startup progress to the requesting renderer", async () => 
     getOnlineUsers: () => [],
     start: ({ onProgress }) => {
       onProgress({ progress: 20, message: "Validando a pasta de arquivos..." });
-      return Promise.resolve({ running: true });
+      return Promise.resolve({ running: true, port: 3000 });
     },
     stop: () => {}
   };
@@ -76,6 +76,14 @@ test("forwards server startup progress to the requesting renderer", async () => 
   assert.deepEqual(sentMessages, [[
     "server:startup-progress",
     { progress: 20, message: "Validando a pasta de arquivos..." }
+  ], [
+    "server:notification",
+    {
+      text: "Servidor ligado",
+      description: "O servidor foi iniciado e está aceitando conexões.",
+      color: "success",
+      icon: "check"
+    }
   ]]);
 });
 
@@ -113,6 +121,44 @@ test("forwards server errors as notifications and preserves the rejected request
       description: serverError.message,
       color: "error",
       icon: "error"
+    }
+  ]]);
+});
+
+test("notifies the renderer after the server stops successfully", async () => {
+  const handlers = new Map();
+  const sentMessages = [];
+  const ipcMain = {
+    handle: (channel, handler) => handlers.set(channel, handler)
+  };
+  const stoppedStatus = { running: false };
+  const serverService = {
+    getStatus: () => ({}),
+    getOnlineUsers: () => [],
+    start: () => Promise.resolve({ running: true }),
+    stop: () => Promise.resolve(stoppedStatus)
+  };
+
+  registerServerIpc(ipcMain, serverService, {
+    readSettings: async () => ({}),
+    saveSettings: async () => ({})
+  });
+
+  const result = await handlers.get("server:stop")({
+    sender: {
+      isDestroyed: () => false,
+      send: (...message) => sentMessages.push(message)
+    }
+  });
+
+  assert.deepEqual(result, stoppedStatus);
+  assert.deepEqual(sentMessages, [[
+    "server:notification",
+    {
+      text: "Servidor desligado",
+      description: "O servidor foi parado e não está mais aceitando conexões.",
+      color: "success",
+      icon: "check"
     }
   ]]);
 });

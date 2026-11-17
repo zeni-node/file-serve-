@@ -22,13 +22,22 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
   });
   ipcMain.handle("server:start", async (event) => {
     try {
-      return await serverService.start({
+      const status = await serverService.start({
         onProgress: (progress) => {
           if (!event.sender.isDestroyed()) {
             event.sender.send("server:startup-progress", progress);
           }
         }
       });
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Servidor ligado",
+          description: "O servidor foi iniciado e está aceitando conexões.",
+          color: "success",
+          icon: "check"
+        });
+      }
+      return status;
     } catch (error) {
       if (!event.sender.isDestroyed()) {
         event.sender.send("server:notification", {
@@ -43,7 +52,16 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
   });
   ipcMain.handle("server:stop", async (event) => {
     try {
-      return await serverService.stop();
+      const status = await serverService.stop();
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Servidor desligado",
+          description: "O servidor foi parado e não está mais aceitando conexões.",
+          color: "success",
+          icon: "check"
+        });
+      }
+      return status;
     } catch (error) {
       if (!event.sender.isDestroyed()) {
         event.sender.send("server:notification", {

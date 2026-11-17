@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Cable, Globe, LoaderCircle, Power, PowerOff, Server } from "lucide-react";
+import { Cable, Globe, LoaderCircle, Power, PowerOff, Server,MapPin, DoorOpen } from "lucide-react";
+import { useNotification } from "../../NotificationGlobal/notification.jsx";
 import QRCode from "../QRCode/QRCode.jsx";
 import "./On_Off.css";
 
@@ -7,6 +8,7 @@ const SERVER_STOP_ANIMATION_DURATION_MS = 1100;
 
 // Controla o servidor local e apresenta estado, endereço e progresso da inicialização.
 export default function On_Off() {
+  const { notify } = useNotification();
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState(null);
@@ -14,13 +16,17 @@ export default function On_Off() {
     progress: 0,
     message: "Carregando configurações..."
   });
-  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
     if (!window.fileServer) {
-      setError("O controle do servidor está disponível somente no aplicativo desktop.");
+      notify({
+        text: "Controle do servidor indisponível",
+        description: "O controle do servidor está disponível somente no aplicativo desktop.",
+        color: "warning",
+        icon: "warning",
+      });
       setLoading(false);
       return () => {
         active = false;
@@ -36,7 +42,12 @@ export default function On_Off() {
       })
       .catch((requestError) => {
         if (active) {
-          setError(`Não foi possível consultar o servidor: ${requestError.message}`);
+          notify({
+            text: "Não foi possível consultar o servidor",
+            description: requestError.message,
+            color: "error",
+            icon: "error",
+          });
         }
       })
       .finally(() => {
@@ -48,7 +59,7 @@ export default function On_Off() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [notify]);
 
   async function changeServerState(action) {
     if (!window.fileServer || busyAction) {
@@ -60,7 +71,6 @@ export default function On_Off() {
     let startedSuccessfully = false;
     const pendingAction = action === "stop" ? "stopping" : "starting";
     setBusyAction(pendingAction);
-    setError("");
 
     if (action === "start") {
       setStartupProgress({ progress: 0, message: "Carregando configurações..." });
@@ -109,12 +119,6 @@ export default function On_Off() {
         : isRunning
           ? "Ligado"
           : "Desligado";
-  const statusDescription = busyAction === "starting"
-    ? startupProgress.message
-    : busyAction === "stopping"
-      ? "Encerrando as conexões e liberando a porta."
-      : status?.message ?? "Aguardando ação.";
-
   return (
     <article
       className={`home-module server-module is-${statusClass}`}
@@ -171,32 +175,27 @@ export default function On_Off() {
 
       <div className="server-module-status" role="status" aria-live="polite">
         <h2>{statusLabel}</h2>
-        <p>{statusDescription}</p>
       </div>
 
-      <dl className="server-module-details">
-        <div>
-          <dt className="visually-hidden">IP da máquina</dt>
-          <dd aria-label={`IP da máquina: ${status?.ip ?? "indisponível"}`}>
-            <Globe size={16} aria-hidden="true" />
-            <span>{status?.ip ?? "—"}</span>
-          </dd>
-        </div>
-        <div>
-          <dt className="visually-hidden">Porta</dt>
-          <dd aria-label={`Porta: ${status?.port ?? "indisponível"}`}>
-            <Cable size={16} aria-hidden="true" />
-            <span>{status?.port ?? "—"}</span>
-            <QRCode isRunning={isRunning} serverUrl={serverUrl} />
-          </dd>
-        </div>
-      </dl>
-
-      {error && (
-        <p className="server-module-error" role="alert">
-          {error}
-        </p>
-      )}
+      <div className="server-module-footer">
+        <dl className="server-module-details">
+          <div>
+            <dt className="visually-hidden">IP da máquina</dt>
+            <dd aria-label={`IP da máquina: ${status?.ip ?? "indisponível"}`}>
+              <MapPin size={16} aria-hidden="true" />
+              <span>{status?.ip ?? "—"}</span>
+            </dd>
+          </div>
+          <div>
+            <dt className="visually-hidden">Porta</dt>
+            <dd aria-label={`Porta: ${status?.port ?? "indisponível"}`}>
+              <DoorOpen size={16} aria-hidden="true" />
+              <span>{status?.port ?? "—"}</span>
+            </dd>
+          </div>
+        </dl>
+        <QRCode isRunning={isRunning} serverUrl={serverUrl} />
+      </div>
     </article>
   );
 }

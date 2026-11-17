@@ -53,11 +53,11 @@ export default function PasswordField({
 
   return (
     <section
-      className={`password-field${enabled ? " is-expanded" : ""}`}
+      className={`settings-card password-field${enabled ? " is-expanded" : ""}`}
       aria-labelledby="settings-password-title"
     >
-      <div className="password-field-heading">
-        <div className="password-field-title">
+      <div className="settings-card-heading password-field-heading">
+        <div className="settings-card-heading-title password-field-title">
           <LockKeyhole size={21} aria-hidden="true" />
           <h2 id="settings-password-title">Senha do servidor</h2>
         </div>

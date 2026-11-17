@@ -1,18 +1,16 @@
-/* Cabeçalho da página, ocupando toda a largura da grade. */
-.settings-heading {
-  box-sizing: border-box;
+/* Ocupa toda a largura da grade como cabeçalho da página inicial. */
+.home-heading {
   grid-column: 1 / -1;
   width: 100%;
   margin: 0 0 8px;
-  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-/* Tipografia principal da página de configurações. */
-.settings-heading__title {
+/* Define escala, peso e espaçamento do título da página. */
+.home-heading__title {
   margin: 0;
   color: #2C2D40;
-  font-size: clamp(30px, 4vw, 46px);
-  font-weight: 600;
+  font-size: 35px;
   letter-spacing: -0.045em;
   line-height: 1.15;
 }

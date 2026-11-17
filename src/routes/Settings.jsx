@@ -138,35 +138,45 @@ export default function Settings() {
   return (
     <div className="settings-modules">
       <SettingsHeading />
-      
-      <Files />
-      
-      <PasswordField
-        hasPassword={settings.hasPassword}
-        hasSavedPassword={settings.hasSavedPassword}
-        savedPassword={settings.password}
-        loading={loading || !window.fileServer}
-        saving={saveState === "saving"}
-        onToggle={updatePasswordEnabled}
-        onSave={updatePassword}
-      />
-      
-      <ConnectionLimit
-        value={settings.maxUsers}
-        enabled={settings.maxUsersEnabled}
-        loading={controlsDisabled}
-        saving={saveState === "saving"}
-        onChange={updateMaxUsers}
-        onToggle={updateMaxUsersEnabled}
-      />
-      <AllowedDevices
-        allowedDeviceTypes={settings.allowedDeviceTypes}
-        enabled={settings.allowedDeviceTypesEnabled}
-        loading={controlsDisabled}
-        saving={saveState === "saving"}
-        onChange={updateAllowedDevice}
-        onToggle={updateAllowedDeviceTypesEnabled}
-      />
+
+      <section className="settings-group" aria-labelledby="settings-storage-heading">
+        <h2 className="settings-group-heading" id="settings-storage-heading">
+          Armazenamento
+        </h2>
+        <Files />
+      </section>
+
+      <section className="settings-group" aria-labelledby="settings-access-heading">
+        <h2 className="settings-group-heading" id="settings-access-heading">
+          Acesso ao servidor
+        </h2>
+        <PasswordField
+          hasPassword={settings.hasPassword}
+          hasSavedPassword={settings.hasSavedPassword}
+          savedPassword={settings.password}
+          loading={loading || !window.fileServer}
+          saving={saveState === "saving"}
+          onToggle={updatePasswordEnabled}
+          onSave={updatePassword}
+        />
+        <ConnectionLimit
+          value={settings.maxUsers}
+          enabled={settings.maxUsersEnabled}
+          loading={controlsDisabled}
+          saving={saveState === "saving"}
+          onChange={updateMaxUsers}
+          onToggle={updateMaxUsersEnabled}
+        />
+        <AllowedDevices
+          allowedDeviceTypes={settings.allowedDeviceTypes}
+          enabled={settings.allowedDeviceTypesEnabled}
+          loading={controlsDisabled}
+          saving={saveState === "saving"}
+          onChange={updateAllowedDevice}
+          onToggle={updateAllowedDeviceTypesEnabled}
+        />
+      </section>
+
       <FutureOptions />
     </div>
   );

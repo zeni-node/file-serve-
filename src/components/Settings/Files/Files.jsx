@@ -68,10 +68,10 @@ export default function Files() {
       <header className="files-module-header">
         <div className="files-module-heading">
           <div className="files-module-title">
-            <div className="files-module-title-copy">
-              <div className="files-module-title-heading">
+            <div className="settings-card-heading settings-card-heading--full files-module-title-copy">
+              <div className="settings-card-heading-title files-module-title-heading">
                 <Folder size={25} aria-hidden="true" />
-                <h2 id="files-module-title">Repositório local</h2>
+                <h2 id="files-module-title">Diretório raiz</h2>
               </div>
               <p>Escolha onde os arquivos compartilhados serão armazenados.</p>
             </div>

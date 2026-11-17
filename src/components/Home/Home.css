@@ -9,10 +9,39 @@
   animation: home-modules-enter 220ms ease-out both;
 }
 
+/* Mantém usuários conectados ao lado dos cartões de servidor e repositório. */
+.home-modules > .server-module {
+  grid-column: 1 / span 8;
+  grid-row: 2;
+}
+
+.home-modules > .files-module {
+  grid-column: 1 / span 8;
+  grid-row: 3;
+}
+
+.home-modules > .connected-users-module {
+  grid-column: 9 / -1;
+  grid-row: 2 / span 2;
+}
+
 /* Reduz o número de colunas em telas médias. */
 @media (max-width: 760px) {
   .home-modules {
     grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .home-modules > .server-module {
+    grid-column: 1 / span 3;
+  }
+
+  .home-modules > .files-module {
+    grid-column: 1 / span 3;
+  }
+
+  .home-modules > .connected-users-module {
+    grid-column: 4 / -1;
+    grid-row: 2 / span 2;
   }
 }
 
@@ -20,6 +49,13 @@
 @media (max-width: 560px) {
   .home-modules {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-modules > .server-module,
+  .home-modules > .files-module,
+  .home-modules > .connected-users-module {
+    grid-column: 1 / -1;
+    grid-row: auto;
   }
 }
 

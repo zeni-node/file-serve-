@@ -56,7 +56,7 @@
 /* Estados ativo, foco e desabilitado do controle de alternância. */
 .connection-limit-toggle input:checked + .connection-limit-switch {
   border: none;
-  background: #00ff59;
+  background: #7a838d;
 }
 
 .connection-limit-toggle input:checked + .connection-limit-switch::after {

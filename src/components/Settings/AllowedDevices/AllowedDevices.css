@@ -63,7 +63,7 @@
 .allowed-devices-toggle input:checked + .allowed-devices-switch,
 .allowed-devices-option-toggle input:checked + .allowed-devices-option-switch {
   border: none;
-  background: #00ff59;
+  background: #7a838d;
 }
 
 .allowed-devices-toggle input:checked + .allowed-devices-switch::after,

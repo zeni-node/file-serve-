@@ -73,14 +73,19 @@ export default function Settings() {
         ...additionalSettings
       });
       if (sequence === saveSequence.current) {
-        setSettings({
-          ...nextSettings,
-          maxUsersEnabled: savedSettings.maxUsersEnabled,
-          allowedDeviceTypesEnabled: savedSettings.allowedDeviceTypesEnabled,
-          hasPassword: savedSettings.hasPassword,
+        setSettings((currentSettings) => ({
+          ...currentSettings,
+          maxUsers: savedSettings.maxUsers,
+          maxUsersEnabled: additionalSettings.maxUsersEnabled
+            ?? currentSettings.maxUsersEnabled,
+          allowedDeviceTypes: savedSettings.allowedDeviceTypes,
+          allowedDeviceTypesEnabled: additionalSettings.allowedDeviceTypesEnabled
+            ?? currentSettings.allowedDeviceTypesEnabled,
+          hasPassword: additionalSettings.passwordEnabled
+            ?? currentSettings.hasPassword,
           hasSavedPassword: savedSettings.hasSavedPassword,
-          password: additionalSettings.password ?? nextSettings.password
-        });
+          password: additionalSettings.password ?? currentSettings.password
+        }));
       }
       return true;
     } catch (requestError) {

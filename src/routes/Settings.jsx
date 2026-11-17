@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import AllowedDevices from "../components/Settings/AllowedDevices/AllowedDevices.jsx";
 import ConnectionLimit from "../components/Settings/ConnectionLimit/ConnectionLimit.jsx";
 import Files from "../components/Settings/Files/Files.jsx";
-import FutureOptions from "../components/Settings/FutureOptions/FutureOptions.jsx";
 import PasswordField from "../components/Settings/PasswordField/PasswordField.jsx";
+import ServerPort from "../components/Settings/ServerPort/ServerPort.jsx";
 import SettingsHeading from "../components/Settings/Title/SettingsHeading.jsx";
 import "../components/Settings/Settings.css";
 
 // Valores usados enquanto as configurações salvas ainda estão sendo carregadas.
 const DEFAULT_SETTINGS = {
+  port: 3000,
+  portEnabled: false,
   maxUsers: 25,
   maxUsersEnabled: false,
   allowedDeviceTypes: ["tv", "mobile", "tablet", "computer", "unknown"],
@@ -75,6 +77,9 @@ export default function Settings() {
       if (sequence === saveSequence.current) {
         setSettings((currentSettings) => ({
           ...currentSettings,
+          port: savedSettings.port,
+          portEnabled: additionalSettings.portEnabled
+            ?? currentSettings.portEnabled,
           maxUsers: savedSettings.maxUsers,
           maxUsersEnabled: additionalSettings.maxUsersEnabled
             ?? currentSettings.maxUsersEnabled,
@@ -103,6 +108,14 @@ export default function Settings() {
   // Os módulos recebem valores e ações por propriedades; a persistência fica nesta rota.
   function updateMaxUsers(maxUsers) {
     return persistSettings({ ...settings, maxUsers }, { maxUsersEnabled: true });
+  }
+
+  function updatePort(port) {
+    return persistSettings({ ...settings, port }, { portEnabled: true });
+  }
+
+  function updatePortEnabled(portEnabled) {
+    return persistSettings(settings, { portEnabled });
   }
 
   function updateMaxUsersEnabled(maxUsersEnabled) {
@@ -144,17 +157,16 @@ export default function Settings() {
     <div className="settings-modules">
       <SettingsHeading />
 
-      <section className="settings-group" aria-labelledby="settings-storage-heading">
-        <h2 className="settings-group-heading" id="settings-storage-heading">
-          Armazenamento
-        </h2>
-        <Files />
-      </section>
+
 
       <section className="settings-group" aria-labelledby="settings-access-heading">
+
         <h2 className="settings-group-heading" id="settings-access-heading">
           Acesso ao servidor
-        </h2>
+        </h2> 
+
+        <Files />
+
         <PasswordField
           hasPassword={settings.hasPassword}
           hasSavedPassword={settings.hasSavedPassword}
@@ -163,6 +175,14 @@ export default function Settings() {
           saving={saveState === "saving"}
           onToggle={updatePasswordEnabled}
           onSave={updatePassword}
+        />
+        <ServerPort
+          value={settings.port}
+          enabled={settings.portEnabled}
+          loading={controlsDisabled}
+          saving={saveState === "saving"}
+          onChange={updatePort}
+          onToggle={updatePortEnabled}
         />
         <ConnectionLimit
           value={settings.maxUsers}
@@ -182,7 +202,6 @@ export default function Settings() {
         />
       </section>
 
-      <FutureOptions />
     </div>
   );
 }

@@ -21,6 +21,10 @@ function createAuthRoute(authService) {
     `Max-Age=${Math.floor(SESSION_TTL_MS / 1000)}`
   ].join("; ");
 
+  authRoute.get("/auth/status", (_request, response) => {
+    response.json({ passwordRequired: authService.passwordEnabled });
+  });
+
   authRoute.post("/auth/login", (request, response, next) => {
     const now = Date.now();
     for (const [address, attempts] of failedAttempts) {

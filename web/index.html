@@ -14,8 +14,8 @@
     <form id="login-form">
       <label for="username">Nome</label>
       <input id="username" name="username" type="text" maxlength="64" autocomplete="username" required>
-      <label for="password">Senha</label>
-      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <label for="password" hidden>Senha</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" hidden>
       <button class="primary" type="submit">Entrar</button>
     </form>
     <p id="login-message" class="feedback" aria-live="polite"></p>
@@ -75,6 +75,6 @@
     </div>
     <div id="preview-content" class="preview-content"></div>
   </dialog>
-  <script src="/assets/js/app.js" defer></script>
+  <script type="module" src="/assets/js/app.js"></script>
 </body>
 </html>

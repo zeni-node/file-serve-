@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cable, Globe, LoaderCircle, Power, PowerOff, Server,MapPin, DoorOpen } from "lucide-react";
+import { Copy, DoorOpen, LoaderCircle, MapPin, Power, PowerOff, Server } from "lucide-react";
 import { useNotification } from "../../NotificationGlobal/notification.jsx";
 import QRCode from "../QRCode/QRCode.jsx";
 import "./On_Off.css";
@@ -109,6 +109,32 @@ export default function On_Off() {
   const serverUrl = isRunning && status.ip && status.port
     ? `http://${status.ip}:${status.port}`
     : "";
+
+  async function copyServerUrl() {
+    if (!serverUrl) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(serverUrl);
+      notify({
+        text: "Link copiado",
+        description: "O endereço do servidor foi copiado para a área de transferência.",
+        color: "success",
+        icon: "check",
+      });
+    } catch (copyError) {
+      notify({
+        text: "Não foi possível copiar o link",
+        description: copyError instanceof Error && copyError.message
+          ? copyError.message
+          : "Verifique as permissões de acesso à área de transferência.",
+        color: "error",
+        icon: "error",
+      });
+    }
+  }
+
   const statusClass = busyAction ?? (loading ? "unknown" : isRunning ? "running" : "stopped");
   const statusLabel = loading
     ? "Consultando..."
@@ -177,25 +203,38 @@ export default function On_Off() {
         <h2>{statusLabel}</h2>
       </div>
 
-      <div className="server-module-footer">
-        <dl className="server-module-details">
-          <div>
-            <dt className="visually-hidden">IP da máquina</dt>
-            <dd aria-label={`IP da máquina: ${status?.ip ?? "indisponível"}`}>
-              <MapPin size={16} aria-hidden="true" />
-              <span>{status?.ip ?? "—"}</span>
-            </dd>
+      {isRunning && (
+        <div className="server-module-footer">
+          <dl className="server-module-details">
+            <div>
+              <dt className="visually-hidden">IP da máquina</dt>
+              <dd aria-label={`IP da máquina: ${status.ip}`}>
+                <MapPin size={16} aria-hidden="true" />
+                <span>{status.ip}</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="visually-hidden">Porta</dt>
+              <dd aria-label={`Porta: ${status.port}`}>
+                <DoorOpen size={16} aria-hidden="true" />
+                <span>{status.port}</span>
+              </dd>
+            </div>
+          </dl>
+          <div className="server-module-actions">
+            <button
+              className="server-module-copy-link"
+              type="button"
+              onClick={copyServerUrl}
+              aria-label="Copiar link do servidor"
+              title="Copiar link do servidor"
+            >
+              <Copy size={21} aria-hidden="true" />
+            </button>
+            <QRCode isRunning={isRunning} serverUrl={serverUrl} />
           </div>
-          <div>
-            <dt className="visually-hidden">Porta</dt>
-            <dd aria-label={`Porta: ${status?.port ?? "indisponível"}`}>
-              <DoorOpen size={16} aria-hidden="true" />
-              <span>{status?.port ?? "—"}</span>
-            </dd>
-          </div>
-        </dl>
-        <QRCode isRunning={isRunning} serverUrl={serverUrl} />
-      </div>
+        </div>
+      )}
     </article>
   );
 }

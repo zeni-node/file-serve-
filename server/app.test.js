@@ -34,7 +34,15 @@ test("serves the web app and its client-side routes", async (t) => {
 
   const scriptResponse = await fetch(`${baseUrl}/assets/js/app.js`);
   assert.equal(scriptResponse.status, 200);
-  assert.match(await scriptResponse.text(), /restoreSession/);
+  assert.match(await scriptResponse.text(), /features\/file-manager\.js/);
+
+  const authModuleResponse = await fetch(`${baseUrl}/assets/js/features/auth.js`);
+  assert.equal(authModuleResponse.status, 200);
+  assert.match(await authModuleResponse.text(), /auth\/status/);
+
+  const apiRoutesResponse = await fetch(`${baseUrl}/assets/js/api/routes.js`);
+  assert.equal(apiRoutesResponse.status, 200);
+  assert.match(await apiRoutesResponse.text(), /presence\/heartbeat/);
 });
 
 test("requires a server password to create a client session", async (t) => {
@@ -45,6 +53,10 @@ test("requires a server password to create a client session", async (t) => {
   }));
 
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const authStatus = await fetch(`${baseUrl}/auth/status`);
+  assert.equal(authStatus.status, 200);
+  assert.deepEqual(await authStatus.json(), { passwordRequired: true });
+
   const rejectedLogin = await fetch(`${baseUrl}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -97,6 +109,9 @@ test("ignores a saved password when password protection is disabled", async (t) 
   }));
 
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const authStatus = await fetch(`${baseUrl}/auth/status`);
+  assert.deepEqual(await authStatus.json(), { passwordRequired: false });
+
   const loginResponse = await fetch(`${baseUrl}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

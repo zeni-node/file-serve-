@@ -6,6 +6,8 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
   ipcMain.handle("server:get-settings", async () => {
     const config = await readSettings();
     return {
+      port: config.port,
+      portEnabled: config.portEnabled,
       maxUsers: config.maxUsers,
       maxUsersEnabled: config.maxUsersEnabled,
       allowedDeviceTypes: config.allowedDeviceTypes,

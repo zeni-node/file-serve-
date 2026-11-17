@@ -1,5 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const http = require("node:http");
 const net = require("node:net");
 const { once } = require("node:events");
 const { performance } = require("node:perf_hooks");
@@ -11,6 +12,8 @@ const { ServerService } = require("./serverService");
 const validConfig = {
   password: "",
   passwordEnabled: false,
+  port: 3000,
+  portEnabled: false,
   maxUsers: 25,
   maxUsersEnabled: false,
   allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
@@ -55,6 +58,74 @@ test("validates startup and serves health checks after opening the port", async 
   const response = await fetch(`http://127.0.0.1:${status.port}/health`);
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { status: "ok", service: "123456" });
+});
+
+test("stops the server and clears users when an HTTP connection is still open", async (t) => {
+  const repositoryPath = await createRepository();
+  const presenceService = new (require("./presenceService").PresenceService)();
+  presenceService.recordHeartbeat("Ana", "192.168.1.10");
+  const service = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    configProvider: async () => validConfig,
+    repositoryPathProvider: async () => repositoryPath,
+    ipAddressProvider: () => "192.168.1.10",
+    presenceService,
+    appFactory: () => http.createServer((_request, response) => {
+      response.writeHead(200);
+      response.flushHeaders();
+    })
+  });
+  t.after(async () => {
+    await service.stop();
+    await rm(repositoryPath, { recursive: true, force: true });
+  });
+
+  const status = await service.start();
+  const response = await new Promise((resolve, reject) => {
+    const request = http.get(`http://127.0.0.1:${status.port}`, resolve);
+    request.once("error", reject);
+  });
+  const responseClosed = once(response, "close");
+
+  const stoppedStatus = await service.stop();
+  await responseClosed;
+
+  assert.equal(stoppedStatus.running, false);
+  assert.equal(response.complete, false);
+  assert.deepEqual(service.getOnlineUsers(), []);
+});
+
+test("uses the saved port when fixed-port mode is enabled", async (t) => {
+  const repositoryPath = await createRepository();
+  const reservation = net.createServer();
+  await new Promise((resolve, reject) => {
+    reservation.once("error", reject);
+    reservation.listen(0, "127.0.0.1", resolve);
+  });
+  const configuredPort = reservation.address().port;
+  await new Promise((resolve, reject) => {
+    reservation.close((error) => error ? reject(error) : resolve());
+  });
+
+  const service = new ServerService({
+    host: "127.0.0.1",
+    port: 0,
+    configProvider: async () => ({
+      ...validConfig,
+      port: configuredPort,
+      portEnabled: true
+    }),
+    repositoryPathProvider: async () => repositoryPath,
+    ipAddressProvider: () => "192.168.1.10"
+  });
+  t.after(async () => {
+    await service.stop();
+    await rm(repositoryPath, { recursive: true, force: true });
+  });
+
+  const status = await service.start();
+  assert.equal(status.port, configuredPort);
 });
 
 test("holds each startup stage for the configured simulation delay", async (t) => {

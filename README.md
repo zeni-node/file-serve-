@@ -35,8 +35,18 @@ abrir o servidor no navegador. Ou se preferir digitar, use as informações de *
   conexões.
 - `src/`: interface React, organizada em páginas e módulos de componentes.
 - `web/`: interface aberta no navegador dos dispositivos conectados.
+  - `assets/js/app.js`: entrada do cliente web.
+  - `assets/js/api/`: rotas HTTP do servidor e cliente comum para respostas JSON/texto.
+  - `assets/js/features/`: autenticação e presença, gerenciador de arquivos,
+    pré-visualização e transferências.
+  - `assets/js/shared/`: ícones e formatação compartilhados.
 - `json/`: arquivos locais de configuração do aplicativo.
 - `public/`: recursos estáticos, como ícones e logotipos.
+
+O cliente consulta `/auth/status` para saber se a senha está habilitada e
+envia a senha somente quando o servidor a exige. As demais chamadas HTTP ficam
+agrupadas por domínio em `web/assets/js/api/routes.js`, alinhadas às rotas de
+autenticação, presença e arquivos do servidor.
 
 ## Comandos úteis
 

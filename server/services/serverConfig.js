@@ -4,6 +4,7 @@ const { DEVICE_TYPES } = require("./presenceService");
 const { MAX_PASSWORD_LENGTH } = require("./authService");
 
 const DEFAULT_MAX_USERS = 25;
+const DEFAULT_SERVER_PORT = 3000;
 const DEFAULT_ALLOWED_DEVICE_TYPES = [...DEVICE_TYPES];
 
 function parseServerConfig(contents, filePath) {
@@ -31,6 +32,18 @@ function parseServerConfig(contents, filePath) {
   if (typeof passwordEnabled !== "boolean") {
     throw new Error(
       `O campo "passwordEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  const port = config.port ?? DEFAULT_SERVER_PORT;
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(
+      `O campo "port" no arquivo "${filePath}" deve ser um número inteiro entre 1 e 65535.`
+    );
+  }
+  const portEnabled = config.portEnabled ?? false;
+  if (typeof portEnabled !== "boolean") {
+    throw new Error(
+      `O campo "portEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
     );
   }
   const maxUsers = config.maxUsers ?? DEFAULT_MAX_USERS;
@@ -77,6 +90,8 @@ function parseServerConfig(contents, filePath) {
   return {
     password: config.password,
     passwordEnabled,
+    port,
+    portEnabled,
     maxUsers,
     maxUsersEnabled,
     allowedDeviceTypes: normalizedAllowedDeviceTypes,
@@ -92,6 +107,8 @@ async function readServerConfig({ directory }) {
 
 async function saveServerSettings({
   directory,
+  port,
+  portEnabled,
   maxUsers,
   allowedDeviceTypes,
   maxUsersEnabled,
@@ -106,6 +123,9 @@ async function saveServerSettings({
       (typeof password !== "string" ||
         password.length > MAX_PASSWORD_LENGTH)) ||
     (passwordEnabled !== undefined && typeof passwordEnabled !== "boolean") ||
+    (port !== undefined &&
+      (!Number.isInteger(port) || port < 1 || port > 65535)) ||
+    (portEnabled !== undefined && typeof portEnabled !== "boolean") ||
     (maxUsersEnabled !== undefined && typeof maxUsersEnabled !== "boolean") ||
     (allowedDeviceTypesEnabled !== undefined &&
       typeof allowedDeviceTypesEnabled !== "boolean")
@@ -128,6 +148,8 @@ async function saveServerSettings({
     passwordEnabled: passwordEnabled ?? (
       password ? true : currentConfig.passwordEnabled
     ),
+    port: port ?? currentConfig.port,
+    portEnabled: portEnabled ?? currentConfig.portEnabled,
     maxUsers,
     maxUsersEnabled: nextMaxUsersEnabled,
     allowedDeviceTypes,
@@ -138,6 +160,8 @@ async function saveServerSettings({
   await mkdir(directory, { recursive: true });
   await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
   return {
+    port: config.port,
+    portEnabled: config.portEnabled,
     maxUsers: config.maxUsers,
     maxUsersEnabled: config.maxUsersEnabled,
     allowedDeviceTypes: config.allowedDeviceTypes,
@@ -150,6 +174,7 @@ async function saveServerSettings({
 module.exports = {
   DEFAULT_ALLOWED_DEVICE_TYPES,
   DEFAULT_MAX_USERS,
+  DEFAULT_SERVER_PORT,
   readServerConfig,
   saveServerSettings
 };

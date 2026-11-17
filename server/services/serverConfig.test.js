@@ -36,6 +36,8 @@ test("creates missing JSON files with empty settings when the server starts", as
     {
       password: "",
       passwordEnabled: false,
+      port: 3000,
+      portEnabled: false,
       maxUsers: 25,
       maxUsersEnabled: false,
       allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
@@ -63,6 +65,8 @@ test("preserves existing JSON files when ensuring the configured list", async (t
   assert.deepEqual(config, {
     password: "custom-password",
     passwordEnabled: true,
+    port: 3000,
+    portEnabled: false,
     maxUsers: 12,
     maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile", "tv"],
@@ -109,6 +113,8 @@ test("uses defaults for new settings in an existing server config", async (t) =>
   assert.deepEqual(await readServerConfig({ directory }), {
     password: "legacy",
     passwordEnabled: true,
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
@@ -137,10 +143,17 @@ test("rejects a user limit outside the supported range and invalid device types"
   await writeFile(configPath, '{"password":"saved","passwordEnabled":"false"}');
   await assert.rejects(readServerConfig({ directory }), /deve ser verdadeiro ou falso/);
 
+  await writeFile(configPath, '{"password":"","port":65536}');
+  await assert.rejects(readServerConfig({ directory }), /entre 1 e 65535/);
+  await writeFile(configPath, '{"password":"","portEnabled":"false"}');
+  await assert.rejects(readServerConfig({ directory }), /deve ser verdadeiro ou falso/);
+
   await writeFile(configPath, '{"password":"","passwordEnabled":true}');
   assert.deepEqual(await readServerConfig({ directory }), {
     password: "",
     passwordEnabled: true,
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
@@ -161,12 +174,16 @@ test("saves server settings immediately without changing the configured password
 
   const settings = await saveServerSettings({
     directory,
+    port: 4821,
+    portEnabled: true,
     maxUsers: 8,
     allowedDeviceTypes: ["mobile", "tv"],
     allowedDeviceTypesEnabled: true
   });
 
   assert.deepEqual(settings, {
+    port: 4821,
+    portEnabled: true,
     maxUsers: 8,
     maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile", "tv"],
@@ -177,6 +194,8 @@ test("saves server settings immediately without changing the configured password
   assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
     password: "keep-this-password",
     passwordEnabled: true,
+    port: 4821,
+    portEnabled: true,
     maxUsers: 8,
     maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile", "tv"],
@@ -207,6 +226,8 @@ test("updates or disables the server password without returning the secret", asy
   });
 
   assert.deepEqual(settings, {
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],
@@ -223,6 +244,8 @@ test("updates or disables the server password without returning the secret", asy
     passwordEnabled: false
   });
   assert.deepEqual(passwordlessSettings, {
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile"],
@@ -233,6 +256,8 @@ test("updates or disables the server password without returning the secret", asy
   assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
     password: "new-password",
     passwordEnabled: false,
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile"],
@@ -263,6 +288,8 @@ test("saves password protection enabled when no password is configured", async (
   assert.deepEqual(JSON.parse(await readFile(configPath, "utf8")), {
     password: "",
     passwordEnabled: true,
+    port: 3000,
+    portEnabled: false,
     maxUsers: 25,
     maxUsersEnabled: false,
     allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],

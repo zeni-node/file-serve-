@@ -18,12 +18,16 @@ test("exposes the saved password to the settings UI", async () => {
     readSettings: async () => ({
       password: "private-server-password",
       passwordEnabled: true,
+      port: 4821,
+      portEnabled: true,
       maxUsers: 12,
       maxUsersEnabled: true,
       allowedDeviceTypes: ["mobile"],
       allowedDeviceTypesEnabled: true
     }),
     saveSettings: async () => ({
+      port: 4821,
+      portEnabled: true,
       maxUsers: 12,
       maxUsersEnabled: true,
       allowedDeviceTypes: ["mobile"],
@@ -35,6 +39,8 @@ test("exposes the saved password to the settings UI", async () => {
 
   const settings = await handlers.get("server:get-settings")();
   assert.deepEqual(settings, {
+    port: 4821,
+    portEnabled: true,
     maxUsers: 12,
     maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile"],
@@ -72,7 +78,7 @@ test("forwards server startup progress to the requesting renderer", async () => 
       send: (...message) => sentMessages.push(message)
     }
   });
-  assert.deepEqual(result, { running: true });
+  assert.deepEqual(result, { running: true, port: 3000 });
   assert.deepEqual(sentMessages, [[
     "server:startup-progress",
     { progress: 20, message: "Validando a pasta de arquivos..." }

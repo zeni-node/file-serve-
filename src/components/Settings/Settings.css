@@ -97,11 +97,6 @@
   grid-column: 1 / -1;
 }
 
-.settings-modules .settings-future-options {
-  border-style: dashed;
-  background: #fcfcfc;
-}
-
 /* Organiza os cartões de cada categoria sob um subtítulo próprio. */
 .settings-group {
   display: grid;

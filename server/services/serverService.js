@@ -8,9 +8,9 @@ const {
   DEVICE_TYPES,
   PresenceService
 } = require("./presenceService");
+const { DEFAULT_SERVER_PORT } = require("./serverConfig");
 
 const DEFAULT_HOST = "0.0.0.0";
-const DEFAULT_PORT = 3000;
 
 function getLocalIpAddress() {
   const interfaces = os.networkInterfaces();
@@ -29,7 +29,7 @@ function getLocalIpAddress() {
 class ServerService {
   constructor({
     host = DEFAULT_HOST,
-    port = DEFAULT_PORT,
+    port = DEFAULT_SERVER_PORT,
     password = "",
     configProvider = async () => ({ password }),
     appFactory = createApp,
@@ -48,6 +48,7 @@ class ServerService {
 
     this.host = host;
     this.port = port;
+    this.initialPort = port;
     this.password = password;
     this.configProvider = configProvider;
     this.appFactory = appFactory;
@@ -92,6 +93,11 @@ class ServerService {
     try {
       await this.reportStartupProgress(onProgress, 0, "Carregando configurações...");
       const config = await this.configProvider();
+      this.port = config.portEnabled === undefined
+        ? this.initialPort
+        : config.portEnabled
+          ? config.port
+          : 0;
       await this.reportStartupProgress(onProgress, 20, "Validando a pasta de arquivos...");
       await this.validateRepository();
       await this.reportStartupProgress(onProgress, 40, "Verificando a rede e a porta...");
@@ -203,7 +209,7 @@ class ServerService {
 
     const server = this.server;
 
-    await new Promise((resolve, reject) => {
+    const closePromise = new Promise((resolve, reject) => {
       server.close((error) => {
         if (error) {
           this.status.message = `Não foi possível parar: ${error.message}`;
@@ -214,6 +220,8 @@ class ServerService {
         resolve();
       });
     });
+    server.closeAllConnections();
+    await closePromise;
 
     this.server = null;
     this.presenceService.clear();

@@ -1,5 +1,6 @@
 const { mkdir, writeFile } = require("node:fs/promises");
 const path = require("node:path");
+const { DEFAULT_SERVER_PORT } = require("./serverConfig");
 
 const JSON_FILES = [
   {
@@ -7,6 +8,8 @@ const JSON_FILES = [
     createDefault: () => ({
       password: "",
       passwordEnabled: false,
+      port: DEFAULT_SERVER_PORT,
+      portEnabled: false,
       maxUsers: 25,
       maxUsersEnabled: false,
       allowedDeviceTypes: ["mobile", "tablet", "computer", "tv", "unknown"],

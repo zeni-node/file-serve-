@@ -31,6 +31,7 @@ abrir o servidor no navegador. Ou se preferir digitar, use as informações de *
 ## Estrutura do projeto
 
 - `electron/`: janela desktop e comunicação entre a interface e o sistema.
+  - `splash.js`, `splash.html` e `splash.css`: tela de abertura dedicada do aplicativo.
 - `server/`: servidor local, rotas e serviços de arquivos, autenticação e
   conexões.
 - `src/`: interface React, organizada em páginas e módulos de componentes.
@@ -52,4 +53,12 @@ autenticação, presença e arquivos do servidor.
 
 - `npm run build`: gera a versão de produção da interface.
 - `npm test`: executa os testes do projeto.
-- `npm run dist`: cria o instalador desktop para Windows.
+- `npm run dist`: cria o instalador desktop para Windows em `release/`. A pasta
+  final contém somente o arquivo de instalação; os arquivos intermediários do
+  empacotamento são removidos. O instalador permite escolher a pasta de destino
+  e cria atalhos na área de trabalho e no menu Iniciar.
+
+O aplicativo usa Electron, que inclui Chromium e Node.js; por isso, o tamanho
+instalado tem um limite mínimo considerável mesmo quando o código do projeto é
+pequeno. As dependências da interface são incorporadas à build do Vite e não
+são instaladas separadamente no computador do usuário.

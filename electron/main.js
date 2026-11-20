@@ -13,6 +13,8 @@ const { registerServerIpc } = require("./ipc/server.ipc");
 const { readRepositoryPath, registerRepositoryIpc } = require("./ipc/repository.ipc");
 const { createSplashScreen } = require("./splash");
 
+const MAIN_WINDOW_STARTUP_TIMEOUT_MS = 15_000;
+
 function getJsonDirectory() {
   return app.isPackaged
     ? path.join(app.getPath("userData"), "json")
@@ -72,18 +74,83 @@ function createWindow() {
     mainWindow: window
   });
 
-  window.once("ready-to-show", splashScreen.markMainReady);
+  let startupReady = false;
+  let startupFailureHandled = false;
+  const startupTimeout = setTimeout(() => {
+    handleStartupFailure("A janela principal não ficou pronta em 15 segundos.");
+  }, MAIN_WINDOW_STARTUP_TIMEOUT_MS);
+
+  function handleStartupFailure(reason) {
+    if (startupReady || startupFailureHandled) {
+      return;
+    }
+
+    startupFailureHandled = true;
+    clearTimeout(startupTimeout);
+    splashScreen.close();
+    console.error("Falha ao iniciar a janela principal.", reason);
+
+    dialog.showMessageBox({
+      type: "error",
+      title: "Não foi possível iniciar o File Serve",
+      message: "A janela principal não carregou corretamente.",
+      detail: `${reason}\n\nVocê pode reiniciar o aplicativo ou fechá-lo.`,
+      buttons: ["Reiniciar", "Fechar"],
+      defaultId: 0,
+      cancelId: 1,
+      noLink: true
+    }).then(({ response }) => {
+      if (response === 0) {
+        app.relaunch();
+        app.exit(0);
+        return;
+      }
+
+      app.quit();
+    }).catch((error) => {
+      console.error("Não foi possível exibir o erro de inicialização.", error);
+      app.quit();
+    });
+  }
+
+  window.once("ready-to-show", () => {
+    if (startupFailureHandled) {
+      return;
+    }
+
+    startupReady = true;
+    clearTimeout(startupTimeout);
+    splashScreen.markMainReady();
+  });
+
+  window.webContents.on("did-fail-load", (_event, code, description, _url, isMainFrame) => {
+    if (isMainFrame) {
+      handleStartupFailure(`Falha ${code} ao carregar a interface: ${description}`);
+    }
+  });
+
+  window.webContents.once("render-process-gone", (_event, details) => {
+    handleStartupFailure(`O processo da interface foi encerrado (${details.reason}).`);
+  });
+
+  window.webContents.once("unresponsive", () => {
+    handleStartupFailure("A janela principal parou de responder durante a inicialização.");
+  });
+
+  if (process.env.FILE_SERVER_TEST_STARTUP_FAILURE === "1" && !app.isPackaged) {
+    handleStartupFailure("Falha simulada para testar a mensagem de inicialização.");
+    return;
+  }
+
   if (app.isPackaged) {
     window
       .loadFile(path.join(__dirname, "..", "dist", "index.html"))
       .catch((error) => {
-        console.error("Não foi possível carregar a janela principal.", error);
-        splashScreen.markMainReady();
+        handleStartupFailure(`Não foi possível carregar a janela principal: ${error.message}`);
       });
   } else {
     window.loadURL("http://127.0.0.1:5173").catch((error) => {
-      console.error("Não foi possível carregar a janela principal.", error);
-      splashScreen.markMainReady();
+      handleStartupFailure(`Não foi possível carregar a janela principal: ${error.message}`);
     });
   }
 }

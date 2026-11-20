@@ -1,6 +1,6 @@
 {
   "name": "file-server",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "private": true,
   "description": "Aplicativo desktop para compartilhar arquivos na rede local.",
   "main": "electron/main.js",
@@ -8,6 +8,7 @@
     "dev": "npm run build && concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
     "build": "vite build",
     "start": "npm run dev",
+    "splash": "npm run build && electron electron/splash-preview.js",
     "test": "node --test",
     "dist": "npm run build && electron-builder --win nsis && node scripts/keep-installer-only.js"
   },

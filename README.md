@@ -52,11 +52,16 @@ autenticação, presença e arquivos do servidor.
 ## Comandos úteis
 
 - `npm run build`: gera a versão de produção da interface.
+- `npm run splash`: abre somente a tela de abertura animada para visualização.
 - `npm test`: executa os testes do projeto.
 - `npm run dist`: cria o instalador desktop para Windows em `release/`. A pasta
   final contém somente o arquivo de instalação; os arquivos intermediários do
   empacotamento são removidos. O instalador permite escolher a pasta de destino
   e cria atalhos na área de trabalho e no menu Iniciar.
+
+Se a janela principal não ficar pronta em 15 segundos ou parar de responder
+durante a inicialização, o aplicativo mostra um erro com as opções **Reiniciar**
+e **Fechar**.
 
 O aplicativo usa Electron, que inclui Chromium e Node.js; por isso, o tamanho
 instalado tem um limite mínimo considerável mesmo quando o código do projeto é

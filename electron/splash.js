@@ -2,8 +2,8 @@ const path = require("node:path");
 
 const SPLASH_DURATION_MS = 1400;
 
-function createSplashScreen({ BrowserWindow, mainWindow }) {
-  const splash = new BrowserWindow({
+function createSplashWindow(BrowserWindow) {
+  return new BrowserWindow({
     width: 440,
     height: 440,
     center: true,
@@ -21,7 +21,10 @@ function createSplashScreen({ BrowserWindow, mainWindow }) {
       sandbox: true
     }
   });
+}
 
+function createSplashScreen({ BrowserWindow, mainWindow }) {
+  const splash = createSplashWindow(BrowserWindow);
   let mainReady = false;
   let splashReady = false;
   let splashFailed = false;
@@ -82,7 +85,14 @@ function createSplashScreen({ BrowserWindow, mainWindow }) {
     .loadFile(path.join(__dirname, "splash.html"))
     .catch(failSplash);
 
-  return { markMainReady };
+  return {
+    markMainReady,
+    close: () => {
+      if (!splash.isDestroyed()) {
+        splash.close();
+      }
+    }
+  };
 }
 
-module.exports = { createSplashScreen };
+module.exports = { createSplashScreen, createSplashWindow };

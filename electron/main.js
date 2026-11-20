@@ -52,7 +52,7 @@ function createWindow() {
     maximizable: false,
     fullscreenable: false,
     show: false,
-    icon: getPublicAssetPath("logo_type", "logotipo.ico"),
+    icon: getPublicAssetPath("logo_type", "logo.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: {
       color: "#ffffff",

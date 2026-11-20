@@ -14,4 +14,15 @@ if (!fs.existsSync(installerPath) || !fs.statSync(installerPath).isFile()) {
 
 fs.mkdirSync(releaseDirectory, { recursive: true });
 fs.copyFileSync(installerPath, releaseInstallerPath);
+
+for (const entry of fs.readdirSync(releaseDirectory, { withFileTypes: true })) {
+  if (
+    entry.isFile() &&
+    /^.+-Setup-[0-9][0-9.]*\.exe$/i.test(entry.name) &&
+    path.join(releaseDirectory, entry.name) !== releaseInstallerPath
+  ) {
+    fs.rmSync(path.join(releaseDirectory, entry.name), { force: true });
+  }
+}
+
 fs.rmSync(outputDirectory, { recursive: true, force: true });

@@ -18,7 +18,10 @@ const notificationIcons = {
 
 const DEFAULT_NOTIFICATION_DURATION = 5000;
 const NOTIFICATION_SOUND_DELAY = 1;
-const NOTIFICATION_SOUND_PATH = "/sound/notificacao.mp3";
+
+function getNotificationSoundUrl() {
+  return new URL("./sound/notificacao.mp3", window.location.href).href;
+}
 const NotificationContext = createContext(null);
 
 function isValidNotification(notification) {
@@ -101,7 +104,8 @@ export function NotificationProvider({ children }) {
 
     const soundTimer = setTimeout(() => {
       soundTimers.current.delete(soundTimer);
-      notificationSound.current ??= new Audio(NOTIFICATION_SOUND_PATH);
+      notificationSound.current ??= new Audio(getNotificationSoundUrl());
+      notificationSound.current.preload = "auto";
       notificationSound.current.currentTime = 0;
       notificationSound.current.play().catch((error) => {
         console.warn("Não foi possível reproduzir o som da notificação.", error);

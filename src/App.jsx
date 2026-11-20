@@ -76,7 +76,7 @@ function AppContent() {
       <aside className="app-sidebar" aria-label="Painel fixo do aplicativo">
         <img
           className="sidebar-logo"
-          src="/logo_type/splash-screan.png"
+          src="./logo_type/splash-screan.png"
           alt="Servidor"
           draggable="false"
         />

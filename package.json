@@ -3,6 +3,7 @@
   "version": "1.1.1",
   "private": true,
   "description": "Aplicativo desktop para compartilhar arquivos na rede local.",
+  "author": "File Serve",
   "main": "electron/main.js",
   "scripts": {
     "dev": "npm run build && concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:5173 && electron .\"",
@@ -47,7 +48,7 @@
     "compression": "maximum",
     "win": {
       "target": "nsis",
-      "icon": "public/logo_type/logotipo.ico"
+      "icon": "public/logo_type/logo.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -56,8 +57,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "File Serve",
-      "installerIcon": "public/logo_type/logotipo.ico",
-      "uninstallerIcon": "public/logo_type/logotipo.ico"
+      "installerIcon": "public/logo_type/logo.ico",
+      "uninstallerIcon": "public/logo_type/logo.ico"
     }
   }
 }

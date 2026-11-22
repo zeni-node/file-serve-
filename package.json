@@ -37,11 +37,11 @@
     },
     "files": [
       "dist/**/*",
-      "web/**/*",
+      "src/server/**/*",
+      "src/web/**/*",
       "electron/**/*",
-      "server/**/*",
-      "!**/*.test.js",
-      "!**/*.spec.js",
+      "!src/server/**/*.test.js",
+      "!src/server/**/*.spec.js",
       "package.json"
     ],
     "artifactName": "${productName}-Setup-${version}.${ext}",

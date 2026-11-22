@@ -1,11 +1,11 @@
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("node:path");
-const { ServerService } = require("../server/services/serverService");
-const { DatabaseController } = require("../server/database/databaseController");
+const { ServerService } = require("../src/server/services/serverService");
+const { DatabaseController } = require("../src/server/database/databaseController");
 const {
   readServerConfig,
   saveServerSettings
-} = require("../server/services/serverConfig");
+} = require("../src/server/services/serverConfig");
 const { registerServerIpc } = require("./ipc/server.ipc");
 const { readRepositoryPath, registerRepositoryIpc } = require("./ipc/repository.ipc");
 const { createSplashScreen } = require("./splash");
@@ -15,7 +15,7 @@ const MAIN_WINDOW_STARTUP_TIMEOUT_MS = 15_000;
 function getDatabaseDirectory() {
   return app.isPackaged
     ? path.join(app.getPath("userData"), "database")
-    : path.join(app.getAppPath(), "server", "database");
+    : path.join(app.getAppPath(), "src", "server", "database");
 }
 
 const databaseController = new DatabaseController({

@@ -27,7 +27,7 @@ class DatabaseController {
           passwordEnabled INTEGER NOT NULL DEFAULT 0,
           port INTEGER,
           portEnabled INTEGER NOT NULL DEFAULT 0,
-          maxUsers INTEGER NOT NULL DEFAULT 1,
+          maxUsers INTEGER NOT NULL DEFAULT 25,
           maxUsersEnabled INTEGER NOT NULL DEFAULT 0,
           allowedDeviceTypes TEXT NOT NULL DEFAULT '["mobile","tablet","computer","tv","unknown"]',
           allowedDeviceTypesEnabled INTEGER NOT NULL DEFAULT 0,

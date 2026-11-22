@@ -86,13 +86,20 @@ test("stops the server and clears users when an HTTP connection is still open", 
     const request = http.get(`http://127.0.0.1:${status.port}`, resolve);
     request.once("error", reject);
   });
-  const responseClosed = once(response, "close");
+  let responseError;
+  response.once("error", (error) => {
+    responseError = error;
+  });
+  const responseClosed = new Promise((resolve) => {
+    response.once("close", resolve);
+  });
 
   const stoppedStatus = await service.stop();
   await responseClosed;
 
   assert.equal(stoppedStatus.running, false);
   assert.equal(response.complete, false);
+  assert.equal(responseError?.code, "ECONNRESET");
   assert.deepEqual(service.getOnlineUsers(), []);
 });
 

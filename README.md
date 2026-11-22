@@ -32,22 +32,22 @@ abrir o servidor no navegador. Ou se preferir digitar, use as informações de *
 
 - `electron/`: janela desktop e comunicação entre a interface e o sistema.
   - `splash.js`, `splash.html` e `splash.css`: tela de abertura dedicada do aplicativo.
-- `server/`: servidor local, rotas e serviços de arquivos, autenticação e
-  conexões.
-- `src/`: interface React, organizada em páginas e módulos de componentes.
-- `web/`: interface aberta no navegador dos dispositivos conectados.
+- `src/server/`: servidor local, banco de dados, rotas e serviços de arquivos,
+  autenticação e conexões.
+- `src/desktop/`: interface React do aplicativo desktop, organizada em páginas
+  e módulos de componentes.
+- `src/web/`: interface aberta no navegador dos dispositivos conectados.
   - `assets/js/app.js`: entrada do cliente web.
   - `assets/js/api/`: rotas HTTP do servidor e cliente comum para respostas JSON/texto.
   - `assets/js/features/`: autenticação e presença, gerenciador de arquivos,
     pré-visualização e transferências.
   - `assets/js/shared/`: ícones e formatação compartilhados.
-- `json/`: arquivos locais de configuração do aplicativo.
 - `public/`: recursos estáticos, como ícones e logotipos.
 
 O cliente consulta `/auth/status` para saber se a senha está habilitada e
 envia a senha somente quando o servidor a exige. As demais chamadas HTTP ficam
-agrupadas por domínio em `web/assets/js/api/routes.js`, alinhadas às rotas de
-autenticação, presença e arquivos do servidor.
+agrupadas por domínio em `src/web/assets/js/api/routes.js`, alinhadas às rotas
+de autenticação, presença e arquivos do servidor.
 
 ## Comandos úteis
 

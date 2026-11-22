@@ -38,11 +38,13 @@ test("serves the web app and its client-side routes", async (t) => {
 
   const authModuleResponse = await fetch(`${baseUrl}/assets/js/features/auth.js`);
   assert.equal(authModuleResponse.status, 200);
-  assert.match(await authModuleResponse.text(), /auth\/status/);
+  assert.match(await authModuleResponse.text(), /API_ROUTES\.auth\.status/);
 
   const apiRoutesResponse = await fetch(`${baseUrl}/assets/js/api/routes.js`);
   assert.equal(apiRoutesResponse.status, 200);
-  assert.match(await apiRoutesResponse.text(), /presence\/heartbeat/);
+  const apiRoutes = await apiRoutesResponse.text();
+  assert.match(apiRoutes, /auth\/status/);
+  assert.match(apiRoutes, /presence\/heartbeat/);
 });
 
 test("requires a server password to create a client session", async (t) => {

@@ -126,7 +126,6 @@
 .connection-limit .settings-limit-control input[type="number"]::-webkit-inner-spin-button,
 .connection-limit .settings-limit-control input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
-  -webkit-appearance: none;
 }
 
 .connection-limit .settings-limit-control input:focus-visible,

@@ -1,10 +1,9 @@
-const { mkdir, readFile, writeFile } = require("node:fs/promises");
-const path = require("node:path");
+const { DatabaseController } = require("../database/databaseController");
 const { DEVICE_TYPES } = require("./presenceService");
 const { MAX_PASSWORD_LENGTH } = require("./authService");
 
 const DEFAULT_MAX_USERS = 25;
-const DEFAULT_SERVER_PORT = 3000;
+const DEFAULT_SERVER_PORT = 0;
 const DEFAULT_ALLOWED_DEVICE_TYPES = [...DEVICE_TYPES];
 
 function parseServerConfig(contents, filePath) {
@@ -34,16 +33,20 @@ function parseServerConfig(contents, filePath) {
       `O campo "passwordEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
     );
   }
-  const port = config.port ?? DEFAULT_SERVER_PORT;
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(
-      `O campo "port" no arquivo "${filePath}" deve ser um número inteiro entre 1 e 65535.`
-    );
-  }
   const portEnabled = config.portEnabled ?? false;
   if (typeof portEnabled !== "boolean") {
     throw new Error(
       `O campo "portEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  const port = config.port ?? DEFAULT_SERVER_PORT;
+  if (
+    !Number.isInteger(port) ||
+    port < (portEnabled ? 1 : 0) ||
+    port > 65535
+  ) {
+    throw new Error(
+      `O campo "port" no arquivo "${filePath}" deve ser um número inteiro entre ${portEnabled ? 1 : 0} e 65535.`
     );
   }
   const maxUsers = config.maxUsers ?? DEFAULT_MAX_USERS;
@@ -99,14 +102,28 @@ function parseServerConfig(contents, filePath) {
   };
 }
 
-async function readServerConfig({ directory }) {
-  const configPath = path.join(directory, "server.json");
-  const contents = await readFile(configPath, "utf8");
-  return parseServerConfig(contents, configPath);
+function getDatabaseController(directory, databaseController) {
+  const controller = databaseController ?? new DatabaseController({ directory });
+  controller.initialize();
+  return controller;
+}
+
+function assertDatabaseResponse(response) {
+  if (!response?.ok) {
+    throw new Error(response?.error || "O controlador do banco de dados respondeu com um erro.");
+  }
+  return response.data;
+}
+
+async function readServerConfig({ directory, databaseController }) {
+  const controller = getDatabaseController(directory, databaseController);
+  const config = assertDatabaseResponse(controller.execute("settings:get"));
+  return parseServerConfig(JSON.stringify(config), controller.primaryPath);
 }
 
 async function saveServerSettings({
   directory,
+  databaseController,
   port,
   portEnabled,
   maxUsers,
@@ -124,7 +141,7 @@ async function saveServerSettings({
         password.length > MAX_PASSWORD_LENGTH)) ||
     (passwordEnabled !== undefined && typeof passwordEnabled !== "boolean") ||
     (port !== undefined &&
-      (!Number.isInteger(port) || port < 1 || port > 65535)) ||
+      (!Number.isInteger(port) || port < 0 || port > 65535)) ||
     (portEnabled !== undefined && typeof portEnabled !== "boolean") ||
     (maxUsersEnabled !== undefined && typeof maxUsersEnabled !== "boolean") ||
     (allowedDeviceTypesEnabled !== undefined &&
@@ -135,8 +152,8 @@ async function saveServerSettings({
     );
   }
 
-  const configPath = path.join(directory, "server.json");
-  const currentConfig = await readServerConfig({ directory });
+  const controller = getDatabaseController(directory, databaseController);
+  const currentConfig = await readServerConfig({ directory, databaseController: controller });
   const nextPassword = password || currentConfig.password;
   const nextMaxUsersEnabled = maxUsersEnabled ?? (
     maxUsers === currentConfig.maxUsers
@@ -155,19 +172,18 @@ async function saveServerSettings({
     allowedDeviceTypes,
     allowedDeviceTypesEnabled: allowedDeviceTypesEnabled ??
       currentConfig.allowedDeviceTypesEnabled
-  }), configPath);
+  }), controller.primaryPath);
 
-  await mkdir(directory, { recursive: true });
-  await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+  const saved = assertDatabaseResponse(controller.execute("settings:save", config));
   return {
-    port: config.port,
-    portEnabled: config.portEnabled,
-    maxUsers: config.maxUsers,
-    maxUsersEnabled: config.maxUsersEnabled,
-    allowedDeviceTypes: config.allowedDeviceTypes,
-    allowedDeviceTypesEnabled: config.allowedDeviceTypesEnabled,
-    hasPassword: config.passwordEnabled,
-    hasSavedPassword: config.password.length > 0
+    port: saved.port,
+    portEnabled: saved.portEnabled,
+    maxUsers: saved.maxUsers,
+    maxUsersEnabled: saved.maxUsersEnabled,
+    allowedDeviceTypes: saved.allowedDeviceTypes,
+    allowedDeviceTypesEnabled: saved.allowedDeviceTypesEnabled,
+    hasPassword: saved.passwordEnabled,
+    hasSavedPassword: saved.password.length > 0
   };
 }
 

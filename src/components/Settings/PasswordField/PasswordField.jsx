@@ -78,7 +78,7 @@ export default function PasswordField({
       <div className="password-field-details" aria-hidden={!enabled}>
         <form className="password-field-details-content" onSubmit={handleSave}>
           <label className="password-field-control">
-            <span>{hasSavedPassword ? "" : "Senha"}</span>
+            <span>{hasSavedPassword}</span>
             <span className="password-field-input-wrap">
               <input
                 placeholder="Digite sua senha..."

@@ -9,7 +9,7 @@ import "../components/Settings/Settings.css";
 
 // Valores usados enquanto as configurações salvas ainda estão sendo carregadas.
 const DEFAULT_SETTINGS = {
-  port: 3000,
+  port: 0,
   portEnabled: false,
   maxUsers: 25,
   maxUsersEnabled: false,

@@ -12,7 +12,7 @@ export default function ServerPort({
   onToggle
 }) {
   const [isEnabled, setIsEnabled] = useState(enabled);
-  const [port, setPort] = useState(String(value));
+  const [port, setPort] = useState(value ? String(value) : "");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -20,13 +20,20 @@ export default function ServerPort({
   }, [enabled]);
 
   useEffect(() => {
-    setPort(String(value));
+    setPort(value ? String(value) : "");
   }, [value]);
 
   async function handleToggle(event) {
     const nextEnabled = event.target.checked;
     setIsEnabled(nextEnabled);
     setError("");
+
+    if (
+      nextEnabled &&
+      (!Number.isInteger(Number(port)) || Number(port) < 1 || Number(port) > 65535)
+    ) {
+      return;
+    }
 
     if (!(await onToggle(nextEnabled))) {
       setIsEnabled(!nextEnabled);
@@ -78,9 +85,9 @@ export default function ServerPort({
       <div className="server-port-details" aria-hidden={!isEnabled}>
         <form className="server-port-form" onSubmit={handleSave}>
           <label className="server-port-control">
-            <span>Porta (1–65535)</span>
             <input
               type="number"
+              placeholder="Digite um valor entre 1 a 65535."
               min="1"
               max="65535"
               step="1"

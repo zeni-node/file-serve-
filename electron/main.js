@@ -1,10 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("node:path");
 const { ServerService } = require("../server/services/serverService");
-const {
-  ensureJsonFiles,
-  saveRepositoryPath: saveRepositoryJsonPath
-} = require("../server/services/jsonFileManager");
+const { DatabaseController } = require("../server/database/databaseController");
 const {
   readServerConfig,
   saveServerSettings
@@ -15,26 +12,32 @@ const { createSplashScreen } = require("./splash");
 
 const MAIN_WINDOW_STARTUP_TIMEOUT_MS = 15_000;
 
-function getJsonDirectory() {
+function getDatabaseDirectory() {
   return app.isPackaged
-    ? path.join(app.getPath("userData"), "json")
-    : path.join(app.getAppPath(), "json");
+    ? path.join(app.getPath("userData"), "database")
+    : path.join(app.getAppPath(), "server", "database");
 }
+
+const databaseController = new DatabaseController({
+  directory: getDatabaseDirectory()
+});
 
 const serverService = new ServerService({
   startupStepDelayMs: process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS === undefined
     ? 500
     : Number(process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS),
   configProvider: async () => {
-    const repositoryPath = await readRepositoryPath(app);
-    await ensureJsonFiles({
-      directory: getJsonDirectory(),
-      repositoryPath
+    const health = databaseController.initialize();
+    if (!health.ok) {
+      throw new Error(`Falha no controlador do banco de dados: ${health.error}`);
+    }
+    await readRepositoryPath(app, databaseController);
+    return readServerConfig({
+      directory: getDatabaseDirectory(),
+      databaseController
     });
-    await readRepositoryPath(app);
-    return readServerConfig({ directory: getJsonDirectory() });
   },
-  repositoryPathProvider: () => readRepositoryPath(app)
+  repositoryPathProvider: () => readRepositoryPath(app, databaseController)
 });
 function getPublicAssetPath(...segments) {
   const assetRoot = app.isPackaged
@@ -157,21 +160,33 @@ function createWindow() {
 
 registerServerIpc(ipcMain, serverService, {
   readSettings: async () => {
-    await ensureJsonFiles({ directory: getJsonDirectory() });
-    return readServerConfig({ directory: getJsonDirectory() });
+    const health = databaseController.initialize();
+    if (!health.ok) {
+      throw new Error(`Falha no controlador do banco de dados: ${health.error}`);
+    }
+    return readServerConfig({
+      directory: getDatabaseDirectory(),
+      databaseController
+    });
   },
   saveSettings: async (settings) => {
-    await ensureJsonFiles({ directory: getJsonDirectory() });
-    return saveServerSettings({ directory: getJsonDirectory(), ...settings });
+    return saveServerSettings({
+      directory: getDatabaseDirectory(),
+      databaseController,
+      ...settings
+    });
   }
 });
 registerRepositoryIpc(ipcMain, {
   app,
   dialog,
-  saveSelectedRepositoryPath: (repositoryPath) => saveRepositoryJsonPath({
-    directory: getJsonDirectory(),
-    repositoryPath
-  })
+  databaseController,
+  saveSelectedRepositoryPath: (repositoryPath) => {
+    const response = databaseController.execute("repository:save", { repositoryPath });
+    if (!response.ok) {
+      throw new Error(response.error);
+    }
+  }
 });
 
 app.whenReady().then(() => {

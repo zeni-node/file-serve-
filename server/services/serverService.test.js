@@ -221,7 +221,11 @@ test("reports when the requested port is already in use", async (t) => {
   const service = new ServerService({
     host: "127.0.0.1",
     port,
-    configProvider: async () => validConfig,
+    configProvider: async () => ({
+      ...validConfig,
+      port,
+      portEnabled: true
+    }),
     repositoryPathProvider: async () => repositoryPath,
     ipAddressProvider: () => "192.168.1.10"
   });

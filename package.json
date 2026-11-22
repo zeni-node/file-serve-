@@ -1,6 +1,6 @@
 {
   "name": "file-server",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "private": true,
   "description": "Aplicativo desktop para compartilhar arquivos na rede local.",
   "author": "File Serve",

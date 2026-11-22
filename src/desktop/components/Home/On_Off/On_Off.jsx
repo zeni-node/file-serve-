@@ -1,0 +1,240 @@
+import { useEffect, useState } from "react";
+import { Copy, DoorOpen, LoaderCircle, MapPin, Power, PowerOff, Server } from "lucide-react";
+import { useNotification } from "../../NotificationGlobal/notification.jsx";
+import QRCode from "../QRCode/QRCode.jsx";
+import "./On_Off.css";
+
+const SERVER_STOP_ANIMATION_DURATION_MS = 1100;
+
+// Controla o servidor local e apresenta estado, endereço e progresso da inicialização.
+export default function On_Off() {
+  const { notify } = useNotification();
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busyAction, setBusyAction] = useState(null);
+  const [startupProgress, setStartupProgress] = useState({
+    progress: 0,
+    message: "Carregando configurações..."
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    if (!window.fileServer) {
+      notify({
+        text: "Controle do servidor indisponível",
+        description: "O controle do servidor está disponível somente no aplicativo desktop.",
+        color: "warning",
+        icon: "warning",
+      });
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    window.fileServer
+      .getStatus()
+      .then((currentStatus) => {
+        if (active) {
+          setStatus(currentStatus);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          notify({
+            text: "Não foi possível consultar o servidor",
+            description: requestError.message,
+            color: "error",
+            icon: "error",
+          });
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [notify]);
+
+  async function changeServerState(action) {
+    if (!window.fileServer || busyAction) {
+      return;
+    }
+
+    const actionStartedAt = Date.now();
+    let unsubscribeProgress = () => {};
+    let startedSuccessfully = false;
+    const pendingAction = action === "stop" ? "stopping" : "starting";
+    setBusyAction(pendingAction);
+
+    if (action === "start") {
+      setStartupProgress({ progress: 0, message: "Carregando configurações..." });
+      // Recebe atualizações de progresso enviadas pelo processo principal do Electron.
+      unsubscribeProgress = window.fileServer.onStartupProgress(setStartupProgress);
+    }
+
+    try {
+      const currentStatus = action === "stop"
+        ? await window.fileServer.stop()
+        : await window.fileServer.start();
+      setStatus(currentStatus);
+      startedSuccessfully = action === "start" && currentStatus.running;
+      if (startedSuccessfully) {
+        setStartupProgress({ progress: 100, message: "Servidor iniciado." });
+      }
+    } catch (requestError) {
+      console.error("Não foi possível alterar o servidor.", requestError);
+    } finally {
+      unsubscribeProgress();
+      // Mantém a animação de desligamento visível por tempo suficiente para concluir.
+      const remainingAnimationTime = action === "stop"
+        ? SERVER_STOP_ANIMATION_DURATION_MS - (Date.now() - actionStartedAt)
+        : 0;
+      if (remainingAnimationTime > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remainingAnimationTime));
+      }
+      if (action === "stop" || !startedSuccessfully) {
+        setStartupProgress({ progress: 0, message: "Carregando configurações..." });
+      }
+      setBusyAction(null);
+    }
+  }
+
+  const isRunning = status?.running === true;
+  const serverUrl = isRunning && status.ip && status.port
+    ? `http://${status.ip}:${status.port}`
+    : "";
+
+  async function copyServerUrl() {
+    if (!serverUrl) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(serverUrl);
+      notify({
+        text: "Link copiado",
+        description: "O endereço do servidor foi copiado para a área de transferência.",
+        color: "success",
+        icon: "check",
+      });
+    } catch (copyError) {
+      notify({
+        text: "Não foi possível copiar o link",
+        description: copyError instanceof Error && copyError.message
+          ? copyError.message
+          : "Verifique as permissões de acesso à área de transferência.",
+        color: "error",
+        icon: "error",
+      });
+    }
+  }
+
+  const statusClass = busyAction ?? (loading ? "unknown" : isRunning ? "running" : "stopped");
+  const statusLabel = loading
+    ? "Consultando..."
+    : busyAction === "starting"
+      ? "Validando e abrindo..."
+      : busyAction === "stopping"
+        ? "Desligando..."
+        : isRunning
+          ? "Ligado"
+          : "Desligado";
+  return (
+    <article
+      className={`home-module server-module is-${statusClass}`}
+      aria-label="Controle do servidor"
+      aria-busy={Boolean(busyAction)}
+      style={{
+        "--server-module-orbit-rotation": `${startupProgress.progress * 3.6}deg`
+      }}
+    >
+      <header className="server-module-heading">
+        <span
+          className="server-module-icon"
+          aria-hidden="true"
+          style={{
+            "--server-module-ring-progress": `${startupProgress.progress * 3.6}deg`
+          }}
+        >
+          <span className="server-module-orbit">
+            <span className="server-module-orbit-dot" />
+          </span>
+          <Server size={40} />
+        </span>
+        <div className="server-module-controls" aria-label="Controles do servidor">
+          <button
+            className="server-module-toggle is-start"
+            type="button"
+            onClick={() => changeServerState("start")}
+            disabled={loading || Boolean(busyAction) || !window.fileServer || isRunning}
+            aria-label="Ligar servidor"
+            title="Ligar servidor"
+          >
+            {busyAction === "starting" ? (
+              <LoaderCircle className="server-module-spinner" size={22} aria-hidden="true" />
+            ) : (
+              <Power size={22} aria-hidden="true" />
+            )}
+          </button>
+          <button
+            className="server-module-toggle is-stop"
+            type="button"
+            onClick={() => changeServerState("stop")}
+            disabled={loading || Boolean(busyAction) || !window.fileServer || !isRunning}
+            aria-label="Desligar servidor"
+            title="Desligar servidor"
+          >
+            {busyAction === "stopping" ? (
+              <LoaderCircle className="server-module-spinner" size={22} aria-hidden="true" />
+            ) : (
+              <PowerOff size={22} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      </header>
+
+      <div className="server-module-status" role="status" aria-live="polite">
+        <h2>{statusLabel}</h2>
+      </div>
+
+      {isRunning && (
+        <div className="server-module-footer">
+          <dl className="server-module-details">
+            <div>
+              <dt className="visually-hidden">IP da máquina</dt>
+              <dd aria-label={`IP da máquina: ${status.ip}`}>
+                <MapPin size={16} aria-hidden="true" />
+                <span>{status.ip}</span>
+              </dd>
+            </div>
+            <div>
+              <dt className="visually-hidden">Porta</dt>
+              <dd aria-label={`Porta: ${status.port}`}>
+                <DoorOpen size={16} aria-hidden="true" />
+                <span>{status.port}</span>
+              </dd>
+            </div>
+          </dl>
+          <div className="server-module-actions">
+            <button
+              className="server-module-copy-link"
+              type="button"
+              onClick={copyServerUrl}
+              aria-label="Copiar link do servidor"
+              title="Copiar link do servidor"
+            >
+              <Copy size={21} aria-hidden="true" />
+            </button>
+            <QRCode isRunning={isRunning} serverUrl={serverUrl} />
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}

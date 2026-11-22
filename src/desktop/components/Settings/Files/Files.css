@@ -1,0 +1,110 @@
+.settings-modules .files-module-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-modules .files-module-title {
+  display: flex;
+  min-width: 0;
+  color: #2C2D40;
+}
+
+.settings-modules .files-module-title-heading h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Botão de seleção e estado de carregamento do diálogo de pastas. */
+.settings-modules .files-module-select {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 120px;
+  height: 42px;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 9px;
+  color: #ffffff;
+  background: #2C2D40;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  transition: width 240ms ease, padding 240ms ease, background-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.settings-modules .files-module-select span {
+  white-space: nowrap;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 140ms ease, transform 180ms ease;
+}
+
+.settings-modules .files-module-select.is-selecting {
+  width: 44px;
+  padding-right: 11px;
+  padding-left: 11px;
+}
+
+.settings-modules .files-module-select.is-selecting .files-module-select-label {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+
+.settings-modules .files-module-select:hover:not(:disabled) {
+  background: #41435a;
+}
+
+.settings-modules .files-module-select:focus-visible {
+  outline: 2px solid #2C2D40;
+  outline-offset: 3px;
+}
+
+.settings-modules .files-module-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.settings-modules .files-module-spinner {
+  position: absolute;
+  opacity: 0;
+  animation: files-module-spin 900ms linear infinite;
+  transition: opacity 140ms ease;
+}
+
+.settings-modules .files-module-select.is-selecting .files-module-spinner {
+  opacity: 1;
+}
+
+/* Caminho selecionado e mensagem de erro da operação. */
+.settings-modules .files-module-path {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #7a838d;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.settings-modules .files-module-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Indicador animado enquanto o diálogo está em processamento. */
+@keyframes files-module-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

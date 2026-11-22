@@ -1,0 +1,196 @@
+const { DatabaseController } = require("../database/databaseController");
+const { DEVICE_TYPES } = require("./presenceService");
+const { MAX_PASSWORD_LENGTH } = require("./authService");
+
+const DEFAULT_MAX_USERS = 25;
+const DEFAULT_SERVER_PORT = 0;
+const DEFAULT_ALLOWED_DEVICE_TYPES = [...DEVICE_TYPES];
+
+function parseServerConfig(contents, filePath) {
+  let config;
+  try {
+    config = JSON.parse(contents);
+  } catch (error) {
+    throw new Error(`O arquivo de configuração "${filePath}" não contém JSON válido.`, {
+      cause: error
+    });
+  }
+
+  if (
+    !config ||
+    typeof config !== "object" ||
+    Array.isArray(config) ||
+    typeof config.password !== "string"
+  ) {
+    throw new Error(
+      `O arquivo de configuração "${filePath}" precisa conter o campo "password" como texto.`
+    );
+  }
+
+  const passwordEnabled = config.passwordEnabled ?? config.password.length > 0;
+  if (typeof passwordEnabled !== "boolean") {
+    throw new Error(
+      `O campo "passwordEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  const portEnabled = config.portEnabled ?? false;
+  if (typeof portEnabled !== "boolean") {
+    throw new Error(
+      `O campo "portEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  const port = config.port ?? DEFAULT_SERVER_PORT;
+  if (
+    !Number.isInteger(port) ||
+    port < (portEnabled ? 1 : 0) ||
+    port > 65535
+  ) {
+    throw new Error(
+      `O campo "port" no arquivo "${filePath}" deve ser um número inteiro entre ${portEnabled ? 1 : 0} e 65535.`
+    );
+  }
+  const maxUsers = config.maxUsers ?? DEFAULT_MAX_USERS;
+  if (!Number.isInteger(maxUsers) || maxUsers < 1 || maxUsers > DEFAULT_MAX_USERS) {
+    throw new Error(
+      `O campo "maxUsers" no arquivo "${filePath}" deve ser um número inteiro entre 1 e ${DEFAULT_MAX_USERS}.`
+    );
+  }
+
+  const maxUsersEnabled = config.maxUsersEnabled ?? (
+    config.maxUsers !== undefined && config.maxUsers < DEFAULT_MAX_USERS
+  );
+  if (typeof maxUsersEnabled !== "boolean") {
+    throw new Error(
+      `O campo "maxUsersEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+
+  const allowedDeviceTypes = config.allowedDeviceTypes ?? DEFAULT_ALLOWED_DEVICE_TYPES;
+  if (
+    !Array.isArray(allowedDeviceTypes) ||
+    allowedDeviceTypes.some((deviceType) => !DEVICE_TYPES.has(deviceType))
+  ) {
+    throw new Error(
+      `O campo "allowedDeviceTypes" no arquivo "${filePath}" deve conter apenas tipos de dispositivo válidos.`
+    );
+  }
+  const normalizedAllowedDeviceTypes = [...new Set(allowedDeviceTypes)];
+  const allowedDeviceTypesEnabled = config.allowedDeviceTypesEnabled ?? (
+    config.allowedDeviceTypes !== undefined &&
+    normalizedAllowedDeviceTypes.length < DEVICE_TYPES.size
+  );
+  if (typeof allowedDeviceTypesEnabled !== "boolean") {
+    throw new Error(
+      `O campo "allowedDeviceTypesEnabled" no arquivo "${filePath}" deve ser verdadeiro ou falso.`
+    );
+  }
+  if (allowedDeviceTypesEnabled && normalizedAllowedDeviceTypes.length === 0) {
+    throw new Error(
+      `O campo "allowedDeviceTypes" no arquivo "${filePath}" deve conter pelo menos um tipo de dispositivo permitido quando o filtro estiver ativado.`
+    );
+  }
+
+  return {
+    password: config.password,
+    passwordEnabled,
+    port,
+    portEnabled,
+    maxUsers,
+    maxUsersEnabled,
+    allowedDeviceTypes: normalizedAllowedDeviceTypes,
+    allowedDeviceTypesEnabled
+  };
+}
+
+function getDatabaseController(directory, databaseController) {
+  const controller = databaseController ?? new DatabaseController({ directory });
+  controller.initialize();
+  return controller;
+}
+
+function assertDatabaseResponse(response) {
+  if (!response?.ok) {
+    throw new Error(response?.error || "O controlador do banco de dados respondeu com um erro.");
+  }
+  return response.data;
+}
+
+async function readServerConfig({ directory, databaseController }) {
+  const controller = getDatabaseController(directory, databaseController);
+  const config = assertDatabaseResponse(controller.execute("settings:get"));
+  return parseServerConfig(JSON.stringify(config), controller.primaryPath);
+}
+
+async function saveServerSettings({
+  directory,
+  databaseController,
+  port,
+  portEnabled,
+  maxUsers,
+  allowedDeviceTypes,
+  maxUsersEnabled,
+  allowedDeviceTypesEnabled,
+  password,
+  passwordEnabled
+}) {
+  if (
+    !Number.isInteger(maxUsers) ||
+    !Array.isArray(allowedDeviceTypes) ||
+    (password !== undefined &&
+      (typeof password !== "string" ||
+        password.length > MAX_PASSWORD_LENGTH)) ||
+    (passwordEnabled !== undefined && typeof passwordEnabled !== "boolean") ||
+    (port !== undefined &&
+      (!Number.isInteger(port) || port < 0 || port > 65535)) ||
+    (portEnabled !== undefined && typeof portEnabled !== "boolean") ||
+    (maxUsersEnabled !== undefined && typeof maxUsersEnabled !== "boolean") ||
+    (allowedDeviceTypesEnabled !== undefined &&
+      typeof allowedDeviceTypesEnabled !== "boolean")
+  ) {
+    throw new TypeError(
+      `Informe configurações válidas e, se fornecida, uma senha com no máximo ${MAX_PASSWORD_LENGTH} caracteres e um estado de senha válido.`
+    );
+  }
+
+  const controller = getDatabaseController(directory, databaseController);
+  const currentConfig = await readServerConfig({ directory, databaseController: controller });
+  const nextPassword = password || currentConfig.password;
+  const nextMaxUsersEnabled = maxUsersEnabled ?? (
+    maxUsers === currentConfig.maxUsers
+      ? currentConfig.maxUsersEnabled
+      : true
+  );
+  const config = parseServerConfig(JSON.stringify({
+    password: nextPassword,
+    passwordEnabled: passwordEnabled ?? (
+      password ? true : currentConfig.passwordEnabled
+    ),
+    port: port ?? currentConfig.port,
+    portEnabled: portEnabled ?? currentConfig.portEnabled,
+    maxUsers,
+    maxUsersEnabled: nextMaxUsersEnabled,
+    allowedDeviceTypes,
+    allowedDeviceTypesEnabled: allowedDeviceTypesEnabled ??
+      currentConfig.allowedDeviceTypesEnabled
+  }), controller.primaryPath);
+
+  const saved = assertDatabaseResponse(controller.execute("settings:save", config));
+  return {
+    port: saved.port,
+    portEnabled: saved.portEnabled,
+    maxUsers: saved.maxUsers,
+    maxUsersEnabled: saved.maxUsersEnabled,
+    allowedDeviceTypes: saved.allowedDeviceTypes,
+    allowedDeviceTypesEnabled: saved.allowedDeviceTypesEnabled,
+    hasPassword: saved.passwordEnabled,
+    hasSavedPassword: saved.password.length > 0
+  };
+}
+
+module.exports = {
+  DEFAULT_ALLOWED_DEVICE_TYPES,
+  DEFAULT_MAX_USERS,
+  DEFAULT_SERVER_PORT,
+  readServerConfig,
+  saveServerSettings
+};

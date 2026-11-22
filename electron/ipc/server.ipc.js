@@ -6,6 +6,8 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
   ipcMain.handle("server:get-settings", async () => {
     const config = await readSettings();
     return {
+      port: config.port,
+      portEnabled: config.portEnabled,
       maxUsers: config.maxUsers,
       maxUsersEnabled: config.maxUsersEnabled,
       allowedDeviceTypes: config.allowedDeviceTypes,
@@ -20,14 +22,60 @@ function registerServerIpc(ipcMain, serverService, { readSettings, saveSettings 
     saveQueue = savePromise.catch(() => undefined);
     return savePromise;
   });
-  ipcMain.handle("server:start", (event) => serverService.start({
-    onProgress: (progress) => {
+  ipcMain.handle("server:start", async (event) => {
+    try {
+      const status = await serverService.start({
+        onProgress: (progress) => {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send("server:startup-progress", progress);
+          }
+        }
+      });
       if (!event.sender.isDestroyed()) {
-        event.sender.send("server:startup-progress", progress);
+        event.sender.send("server:notification", {
+          text: "Servidor ligado",
+          description: "O servidor foi iniciado e está aceitando conexões.",
+          color: "success",
+          icon: "check"
+        });
       }
+      return status;
+    } catch (error) {
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Não foi possível iniciar o servidor",
+          description: error instanceof Error ? error.message : String(error),
+          color: "error",
+          icon: "error"
+        });
+      }
+      throw error;
     }
-  }));
-  ipcMain.handle("server:stop", () => serverService.stop());
+  });
+  ipcMain.handle("server:stop", async (event) => {
+    try {
+      const status = await serverService.stop();
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Servidor desligado",
+          description: "O servidor foi parado e não está mais aceitando conexões.",
+          color: "success",
+          icon: "check"
+        });
+      }
+      return status;
+    } catch (error) {
+      if (!event.sender.isDestroyed()) {
+        event.sender.send("server:notification", {
+          text: "Não foi possível parar o servidor",
+          description: error instanceof Error ? error.message : String(error),
+          color: "error",
+          icon: "error"
+        });
+      }
+      throw error;
+    }
+  });
 }
 
 module.exports = { registerServerIpc };

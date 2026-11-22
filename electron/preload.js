@@ -11,6 +11,11 @@ contextBridge.exposeInMainWorld("fileServer", {
     ipcRenderer.on("server:startup-progress", listener);
     return () => ipcRenderer.removeListener("server:startup-progress", listener);
   },
+  onNotification: (callback) => {
+    const listener = (_event, notification) => callback(notification);
+    ipcRenderer.on("server:notification", listener);
+    return () => ipcRenderer.removeListener("server:notification", listener);
+  },
   stop: () => ipcRenderer.invoke("server:stop"),
   getRepositoryPath: () => ipcRenderer.invoke("repository:get-path"),
   selectRepositoryDirectory: () => ipcRenderer.invoke("repository:select-directory")

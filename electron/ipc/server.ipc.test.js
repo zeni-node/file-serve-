@@ -18,12 +18,16 @@ test("exposes the saved password to the settings UI", async () => {
     readSettings: async () => ({
       password: "private-server-password",
       passwordEnabled: true,
+      port: 4821,
+      portEnabled: true,
       maxUsers: 12,
       maxUsersEnabled: true,
       allowedDeviceTypes: ["mobile"],
       allowedDeviceTypesEnabled: true
     }),
     saveSettings: async () => ({
+      port: 4821,
+      portEnabled: true,
       maxUsers: 12,
       maxUsersEnabled: true,
       allowedDeviceTypes: ["mobile"],
@@ -35,6 +39,8 @@ test("exposes the saved password to the settings UI", async () => {
 
   const settings = await handlers.get("server:get-settings")();
   assert.deepEqual(settings, {
+    port: 4821,
+    portEnabled: true,
     maxUsers: 12,
     maxUsersEnabled: true,
     allowedDeviceTypes: ["mobile"],
@@ -56,7 +62,7 @@ test("forwards server startup progress to the requesting renderer", async () => 
     getOnlineUsers: () => [],
     start: ({ onProgress }) => {
       onProgress({ progress: 20, message: "Validando a pasta de arquivos..." });
-      return Promise.resolve({ running: true });
+      return Promise.resolve({ running: true, port: 3000 });
     },
     stop: () => {}
   };
@@ -72,9 +78,93 @@ test("forwards server startup progress to the requesting renderer", async () => 
       send: (...message) => sentMessages.push(message)
     }
   });
-  assert.deepEqual(result, { running: true });
+  assert.deepEqual(result, { running: true, port: 3000 });
   assert.deepEqual(sentMessages, [[
     "server:startup-progress",
     { progress: 20, message: "Validando a pasta de arquivos..." }
+  ], [
+    "server:notification",
+    {
+      text: "Servidor ligado",
+      description: "O servidor foi iniciado e está aceitando conexões.",
+      color: "success",
+      icon: "check"
+    }
+  ]]);
+});
+
+test("forwards server errors as notifications and preserves the rejected request", async () => {
+  const handlers = new Map();
+  const sentMessages = [];
+  const ipcMain = {
+    handle: (channel, handler) => handlers.set(channel, handler)
+  };
+  const serverError = new Error("A porta já está sendo usada.");
+  const serverService = {
+    getStatus: () => ({}),
+    getOnlineUsers: () => [],
+    start: () => Promise.reject(serverError),
+    stop: () => Promise.resolve({})
+  };
+
+  registerServerIpc(ipcMain, serverService, {
+    readSettings: async () => ({}),
+    saveSettings: async () => ({})
+  });
+
+  const event = {
+    sender: {
+      isDestroyed: () => false,
+      send: (...message) => sentMessages.push(message)
+    }
+  };
+
+  await assert.rejects(handlers.get("server:start")(event), serverError);
+  assert.deepEqual(sentMessages, [[
+    "server:notification",
+    {
+      text: "Não foi possível iniciar o servidor",
+      description: serverError.message,
+      color: "error",
+      icon: "error"
+    }
+  ]]);
+});
+
+test("notifies the renderer after the server stops successfully", async () => {
+  const handlers = new Map();
+  const sentMessages = [];
+  const ipcMain = {
+    handle: (channel, handler) => handlers.set(channel, handler)
+  };
+  const stoppedStatus = { running: false };
+  const serverService = {
+    getStatus: () => ({}),
+    getOnlineUsers: () => [],
+    start: () => Promise.resolve({ running: true }),
+    stop: () => Promise.resolve(stoppedStatus)
+  };
+
+  registerServerIpc(ipcMain, serverService, {
+    readSettings: async () => ({}),
+    saveSettings: async () => ({})
+  });
+
+  const result = await handlers.get("server:stop")({
+    sender: {
+      isDestroyed: () => false,
+      send: (...message) => sentMessages.push(message)
+    }
+  });
+
+  assert.deepEqual(result, stoppedStatus);
+  assert.deepEqual(sentMessages, [[
+    "server:notification",
+    {
+      text: "Servidor desligado",
+      description: "O servidor foi parado e não está mais aceitando conexões.",
+      color: "success",
+      icon: "check"
+    }
   ]]);
 });

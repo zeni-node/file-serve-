@@ -1,41 +1,44 @@
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
-const { readFileSync } = require("node:fs");
 const path = require("node:path");
-const { ServerService } = require("../server/services/serverService");
-const {
-  ensureJsonFiles,
-  saveRepositoryPath: saveRepositoryJsonPath
-} = require("../server/services/jsonFileManager");
+const { ServerService } = require("../src/server/services/serverService");
+const { DatabaseController } = require("../src/server/database/databaseController");
 const {
   readServerConfig,
   saveServerSettings
-} = require("../server/services/serverConfig");
+} = require("../src/server/services/serverConfig");
 const { registerServerIpc } = require("./ipc/server.ipc");
 const { readRepositoryPath, registerRepositoryIpc } = require("./ipc/repository.ipc");
+const { createSplashScreen } = require("./splash");
 
-function getJsonDirectory() {
+const MAIN_WINDOW_STARTUP_TIMEOUT_MS = 15_000;
+
+function getDatabaseDirectory() {
   return app.isPackaged
-    ? path.join(app.getPath("userData"), "json")
-    : path.join(app.getAppPath(), "json");
+    ? path.join(app.getPath("userData"), "database")
+    : path.join(app.getAppPath(), "src", "server", "database");
 }
+
+const databaseController = new DatabaseController({
+  directory: getDatabaseDirectory()
+});
 
 const serverService = new ServerService({
   startupStepDelayMs: process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS === undefined
     ? 500
     : Number(process.env.FILE_SERVER_STARTUP_STEP_DELAY_MS),
   configProvider: async () => {
-    const repositoryPath = await readRepositoryPath(app);
-    await ensureJsonFiles({
-      directory: getJsonDirectory(),
-      repositoryPath
+    const health = databaseController.initialize();
+    if (!health.ok) {
+      throw new Error(`Falha no controlador do banco de dados: ${health.error}`);
+    }
+    await readRepositoryPath(app, databaseController);
+    return readServerConfig({
+      directory: getDatabaseDirectory(),
+      databaseController
     });
-    await readRepositoryPath(app);
-    return readServerConfig({ directory: getJsonDirectory() });
   },
-  repositoryPathProvider: () => readRepositoryPath(app)
+  repositoryPathProvider: () => readRepositoryPath(app, databaseController)
 });
-const splashDuration = 1400;
-
 function getPublicAssetPath(...segments) {
   const assetRoot = app.isPackaged
     ? path.join(__dirname, "..", "dist")
@@ -52,7 +55,7 @@ function createWindow() {
     maximizable: false,
     fullscreenable: false,
     show: false,
-    icon: getPublicAssetPath("logo_type", "logotipo.ico"),
+    icon: getPublicAssetPath("logo_type", "logo.ico"),
     titleBarStyle: "hidden",
     titleBarOverlay: {
       color: "#ffffff",
@@ -69,155 +72,121 @@ function createWindow() {
     }
   });
 
-  const splash = new BrowserWindow({
-    width: 440,
-    height: 440,
-    center: true,
-    frame: false,
-    transparent: true,
-    backgroundColor: "#00000000",
-    resizable: false,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    hasShadow: false,
-    show: false,
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true
-    }
+  const splashScreen = createSplashScreen({
+    BrowserWindow,
+    mainWindow: window
   });
 
-  const logo = readFileSync(getPublicAssetPath("logo_type", "logotipo.png"));
-  const logoDataUrl = `data:image/png;base64,${logo.toString("base64")}`;
-  const splashHtml = `<!doctype html>
-    <html lang="pt-BR">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            background: transparent;
-          }
-          body {
-            display: grid;
-            place-items: center;
-          }
-          img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            opacity: 0;
-            transform: scale(.94);
-          }
-          body.visible img {
-            animation: logo-appear 900ms ease-out forwards;
-          }
-          @keyframes logo-appear {
-            to {
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            body.visible img {
-              animation-duration: 1ms;
-            }
-          }
-        </style>
-      </head>
-      <body><img src="${logoDataUrl}" alt=""></body>
-    </html>`;
+  let startupReady = false;
+  let startupFailureHandled = false;
+  const startupTimeout = setTimeout(() => {
+    handleStartupFailure("A janela principal não ficou pronta em 15 segundos.");
+  }, MAIN_WINDOW_STARTUP_TIMEOUT_MS);
 
-  let mainReady = false;
-  let splashStartedAt = 0;
-  let startupFinished = false;
-
-  function finishStartup() {
-    if (!mainReady || startupFinished) {
+  function handleStartupFailure(reason) {
+    if (startupReady || startupFailureHandled) {
       return;
     }
 
-    startupFinished = true;
-    const elapsed = splashStartedAt ? Date.now() - splashStartedAt : splashDuration;
-    const remaining = Math.max(0, splashDuration - elapsed);
+    startupFailureHandled = true;
+    clearTimeout(startupTimeout);
+    splashScreen.close();
+    console.error("Falha ao iniciar a janela principal.", reason);
 
-    setTimeout(() => {
-      if (!window.isDestroyed()) {
-        window.show();
+    dialog.showMessageBox({
+      type: "error",
+      title: "Não foi possível iniciar o File Serve",
+      message: "A janela principal não carregou corretamente.",
+      detail: `${reason}\n\nVocê pode reiniciar o aplicativo ou fechá-lo.`,
+      buttons: ["Reiniciar", "Fechar"],
+      defaultId: 0,
+      cancelId: 1,
+      noLink: true
+    }).then(({ response }) => {
+      if (response === 0) {
+        app.relaunch();
+        app.exit(0);
+        return;
       }
-      if (!splash.isDestroyed()) {
-        splash.close();
-      }
-    }, remaining);
+
+      app.quit();
+    }).catch((error) => {
+      console.error("Não foi possível exibir o erro de inicialização.", error);
+      app.quit();
+    });
   }
 
-  splash.webContents.once("did-finish-load", () => {
-    splash.show();
-    splashStartedAt = Date.now();
-    splash.webContents
-      .executeJavaScript("document.body.classList.add('visible')")
-      .catch((error) => {
-        console.error("Não foi possível iniciar a animação do logotipo.", error);
-      });
-    finishStartup();
-  });
-
-  splash.webContents.once("did-fail-load", (_event, code, description) => {
-    console.error(`Não foi possível carregar a tela de abertura (${code}): ${description}`);
-    finishStartup();
-  });
-
   window.once("ready-to-show", () => {
-    mainReady = true;
-    finishStartup();
+    if (startupFailureHandled) {
+      return;
+    }
+
+    startupReady = true;
+    clearTimeout(startupTimeout);
+    splashScreen.markMainReady();
   });
+
+  window.webContents.on("did-fail-load", (_event, code, description, _url, isMainFrame) => {
+    if (isMainFrame) {
+      handleStartupFailure(`Falha ${code} ao carregar a interface: ${description}`);
+    }
+  });
+
+  window.webContents.once("render-process-gone", (_event, details) => {
+    handleStartupFailure(`O processo da interface foi encerrado (${details.reason}).`);
+  });
+
+  window.webContents.once("unresponsive", () => {
+    handleStartupFailure("A janela principal parou de responder durante a inicialização.");
+  });
+
+  if (process.env.FILE_SERVER_TEST_STARTUP_FAILURE === "1" && !app.isPackaged) {
+    handleStartupFailure("Falha simulada para testar a mensagem de inicialização.");
+    return;
+  }
 
   if (app.isPackaged) {
     window
       .loadFile(path.join(__dirname, "..", "dist", "index.html"))
       .catch((error) => {
-        console.error("Não foi possível carregar a janela principal.", error);
-        mainReady = true;
-        finishStartup();
+        handleStartupFailure(`Não foi possível carregar a janela principal: ${error.message}`);
       });
   } else {
     window.loadURL("http://127.0.0.1:5173").catch((error) => {
-      console.error("Não foi possível carregar a janela principal.", error);
-      mainReady = true;
-      finishStartup();
+      handleStartupFailure(`Não foi possível carregar a janela principal: ${error.message}`);
     });
   }
-
-  splash
-    .loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(splashHtml)}`)
-    .catch((error) => {
-      console.error("Não foi possível carregar a animação do logotipo.", error);
-      finishStartup();
-    });
 }
 
 registerServerIpc(ipcMain, serverService, {
   readSettings: async () => {
-    await ensureJsonFiles({ directory: getJsonDirectory() });
-    return readServerConfig({ directory: getJsonDirectory() });
+    const health = databaseController.initialize();
+    if (!health.ok) {
+      throw new Error(`Falha no controlador do banco de dados: ${health.error}`);
+    }
+    return readServerConfig({
+      directory: getDatabaseDirectory(),
+      databaseController
+    });
   },
   saveSettings: async (settings) => {
-    await ensureJsonFiles({ directory: getJsonDirectory() });
-    return saveServerSettings({ directory: getJsonDirectory(), ...settings });
+    return saveServerSettings({
+      directory: getDatabaseDirectory(),
+      databaseController,
+      ...settings
+    });
   }
 });
 registerRepositoryIpc(ipcMain, {
   app,
   dialog,
-  saveSelectedRepositoryPath: (repositoryPath) => saveRepositoryJsonPath({
-    directory: getJsonDirectory(),
-    repositoryPath
-  })
+  databaseController,
+  saveSelectedRepositoryPath: (repositoryPath) => {
+    const response = databaseController.execute("repository:save", { repositoryPath });
+    if (!response.ok) {
+      throw new Error(response.error);
+    }
+  }
 });
 
 app.whenReady().then(() => {

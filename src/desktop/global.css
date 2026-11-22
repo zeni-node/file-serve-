@@ -1,0 +1,326 @@
+/* Variáveis e padrões globais da janela e da interface. */
+:root {
+  --chrome-color: #ffffff;
+  --chrome-border-color: rgba(0, 0, 0, 0.06);
+  --chrome-border-width: 1px;
+  --window-corner-radius: 12px;
+  --chrome-height: 44px;
+  --sidebar-logo-size: 40px;
+  --sidebar-icon-size: 56px;
+  --sidebar-icon-background: transparent;
+  --sidebar-icon-hover-background: rgba(119, 119, 119, 0.11);
+  --sidebar-icon-active-background: rgba(92, 92, 92, 0.15);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  color: #202b3c;
+  background: var(--chrome-color);
+}
+
+/* Normaliza dimensões e seleção de texto dos elementos. */
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+/* A aplicação ocupa a janela inteira; a rolagem fica na área de rota. */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--chrome-color);
+}
+
+body {
+  height: 100%;
+}
+
+/* Grade principal com navegação fixa e conteúdo da rota. */
+.app-shell {
+  --sidebar-width: 100px;
+  --route-top-offset: 0px;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  border-radius: var(--window-corner-radius);
+  overflow: hidden;
+  background: var(--chrome-color);
+}
+
+/* Reserva a linha superior usada pela barra de título do Electron. */
+.app-shell.has-titlebar {
+  --route-top-offset: var(--chrome-height);
+  grid-template-rows: var(--chrome-height) minmax(0, 1fr);
+}
+
+/* Barra arrastável da janela do aplicativo desktop. */
+.window-titlebar {
+  z-index: 1;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  height: var(--chrome-height);
+  padding: 0 18px;
+  background: var(--chrome-color);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+/* Logotipo no topo da navegação lateral. */
+.sidebar-logo {
+  display: block;
+  flex: 0 0 var(--sidebar-logo-size);
+  width: var(--sidebar-logo-size);
+  height: var(--sidebar-logo-size);
+  margin: 0 auto 18px;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* Área rolável onde cada rota é exibida. */
+.route-area {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 38px clamp(28px, 6vw, 88px);
+  border-top: var(--chrome-border-width) solid var(--chrome-border-color);
+  border-left: var(--chrome-border-width) solid var(--chrome-border-color);
+  border-top-left-radius: var(--window-corner-radius);
+  background: #F7F6F9;
+}
+
+/* Largura, posição e animação comuns às páginas internas. */
+.route-page {
+  width: min(100%, 1120px);
+  margin: clamp(48px, 10vh, 104px) auto 0;
+  animation: route-enter 220ms ease-out both;
+}
+
+.route-eyebrow {
+  margin: 0 0 12px;
+  color: #8290a3;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.route-title {
+  margin: 0;
+  color: #f0f3f5;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.route-description {
+  margin: 14px 0 0;
+  color: #a7b2c0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Navegação persistente à esquerda das rotas. */
+.app-sidebar {
+  position: relative;
+  z-index: 1001;
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  padding: 20px 16px 24px;
+  color: #f0f3f5;
+  background: var(--chrome-color);
+}
+
+/* Agrupa e centraliza verticalmente os links de navegação. */
+.sidebar-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
+/* Botão de navegação para cada rota. */
+.sidebar-icon-link {
+  position: relative;
+  display: grid;
+  flex: 0 0 var(--sidebar-icon-size);
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+  place-items: center;
+  border: none;
+  border-radius: 12px;
+  color: #2c2d409a;
+  background: var(--sidebar-icon-background);
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.sidebar-icon-link:hover {
+  background: var(--sidebar-icon-hover-background);
+}
+
+.sidebar-icon-link[aria-current="page"] {
+  border-color: rgb(255 255 255 / 12%);
+  color: #2C2D40;
+  background: var(--sidebar-icon-active-background);
+}
+
+/* Marcador da rota atualmente selecionada. */
+.sidebar-active-marker {
+  position: absolute;
+  top: 50%;
+  left: calc(
+    100% +
+    ((var(--sidebar-width) - var(--sidebar-icon-size)) / 2) -
+    8px
+  );
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  width: 8px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 15px 0 0 15px;
+  color: #fff;
+  background: #2C2D40;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* Rótulo exibido ao passar o mouse ou focar um link. */
+.sidebar-route-label {
+  position: absolute;
+  top: 50%;
+  left: calc(
+    100% +
+    ((var(--sidebar-width) - var(--sidebar-icon-size)) / 2) +
+    2px
+  );
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100vw - var(--sidebar-width) - 24px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #2C2D40;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    visibility 0s linear 450ms;
+}
+
+.sidebar-icon-link:hover .sidebar-route-label,
+.sidebar-icon-link:focus-visible .sidebar-route-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -50%);
+  transition-delay: 800ms, 800ms, 0s;
+}
+
+.sidebar-icon-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.sidebar-icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+/* Transição de entrada do conteúdo da rota. */
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Posiciona rota e navegação abaixo da barra de título. */
+.has-titlebar .route-area,
+.has-titlebar .app-sidebar {
+  grid-row: 2;
+}
+
+/* Ajustes de navegação e espaçamento para telas médias. */
+@media (max-width: 760px) {
+  .app-shell {
+    --sidebar-width: 190px;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .app-sidebar {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .route-area {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+}
+
+/* Ajustes de grade e espaçamento para telas estreitas. */
+@media (max-width: 560px) {
+  .app-shell {
+    --sidebar-width: 150px;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .route-area,
+  .has-titlebar .route-area {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    padding: 24px 16px 30px;
+  }
+
+  .app-sidebar,
+  .has-titlebar .app-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 21px 12px;
+  }
+}
